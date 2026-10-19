@@ -1,0 +1,9 @@
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
+out/
+*.class
+.idea/
+.vscode/
+*.iml

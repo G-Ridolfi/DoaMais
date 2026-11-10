@@ -1,9 +1,14 @@
 package com.doamais.dao;
 
+import com.doamais.db.Database;
 import com.doamais.exception.DAOException;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,20 +70,21 @@ public abstract class BaseDAO<T> {
 
     /** @return o objeto com o id informado, ou Optional.empty() se nao existir */
     public Optional<T> buscarPorId(int id) throws DAOException {
-        // TODO(Gabriel): SELECT * FROM getTabela() WHERE id = ?  (usar consultar)
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.buscarPorId");
+        // getTabela() vem do proprio codigo (nunca do usuario); o id vai via "?"
+        List<T> resultado = consultar("SELECT * FROM " + getTabela() + " WHERE id = ?", id);
+        return resultado.isEmpty() ? Optional.empty() : Optional.of(resultado.get(0));
     }
 
     /** @return todos os registros da tabela, ordenados por id */
     public List<T> listarTodos() throws DAOException {
-        // TODO(Gabriel)
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.listarTodos");
+        // POLIMORFISMO: escrito uma unica vez, mas cada DAO filho converte as
+        // linhas com o SEU mapear() (Doador, Receptor, Doacao...).
+        return consultar("SELECT * FROM " + getTabela() + " ORDER BY id");
     }
 
     /** @return true se algum registro foi excluido */
     public boolean excluir(int id) throws DAOException {
-        // TODO(Gabriel)
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.excluir");
+        return executar("DELETE FROM " + getTabela() + " WHERE id = ?", id) > 0;
     }
 
     // ------------------------------------------------------------------
@@ -91,8 +97,24 @@ public abstract class BaseDAO<T> {
      * @return lista (possivelmente vazia, nunca null)
      */
     protected List<T> consultar(String sql, Object... parametros) throws DAOException {
-        // TODO(Gabriel): Database.getConnection() + PreparedStatement + while(rs.next()) mapear(rs)
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.consultar");
+        // COLECAO: ArrayList guarda os objetos na ordem em que vieram do banco
+        List<T> lista = new ArrayList<>();
+        // try-with-resources: Connection, PreparedStatement e ResultSet sao
+        // fechados automaticamente, mesmo se ocorrer erro
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            preencherParametros(ps, parametros);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // POLIMORFISMO: chama o mapear() do DAO filho concreto
+                    lista.add(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            // TRATAMENTO DE EXCECAO: SQLException nao "vaza" para outras camadas
+            throw new DAOException("Erro ao consultar " + getTabela(), e);
+        }
+        return lista;
     }
 
     /**
@@ -101,15 +123,57 @@ public abstract class BaseDAO<T> {
      * @return quantidade de linhas afetadas
      */
     protected int executar(String sql, Object... parametros) throws DAOException {
-        // TODO(Gabriel)
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.executar");
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            preencherParametros(ps, parametros);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw converterErroDeGravacao(e);
+        }
     }
 
     /**
      * Executa um INSERT e devolve o id gerado (AUTOINCREMENT).
      */
     protected int inserirRetornandoId(String sql, Object... parametros) throws DAOException {
-        // TODO(Gabriel): usar Statement.RETURN_GENERATED_KEYS
-        throw new UnsupportedOperationException("TODO(Gabriel): BaseDAO.inserirRetornandoId");
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preencherParametros(ps, parametros);
+            ps.executeUpdate();
+            try (ResultSet chaves = ps.getGeneratedKeys()) {
+                if (chaves.next()) {
+                    return chaves.getInt(1);
+                }
+            }
+            throw new DAOException("Nenhum id foi gerado ao inserir em " + getTabela());
+        } catch (SQLException e) {
+            throw converterErroDeGravacao(e);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Auxiliares PRIVADOS
+    // ------------------------------------------------------------------
+
+    /**
+     * Preenche os "?" do SQL na ordem recebida. Os valores nunca sao
+     * concatenados no texto do SQL, o que impede SQL Injection.
+     */
+    private void preencherParametros(PreparedStatement ps, Object... parametros) throws SQLException {
+        for (int i = 0; i < parametros.length; i++) {
+            ps.setObject(i + 1, parametros[i]); // indices JDBC comecam em 1
+        }
+    }
+
+    /**
+     * Converte a SQLException de uma gravacao em DAOException. Violacao de
+     * UNIQUE (ex: CPF repetido) ganha uma mensagem amigavel para a tela.
+     */
+    private DAOException converterErroDeGravacao(SQLException e) {
+        String mensagem = e.getMessage();
+        if (mensagem != null && mensagem.contains("UNIQUE")) {
+            return new DAOException("Registro duplicado em " + getTabela(), e);
+        }
+        return new DAOException("Erro ao gravar em " + getTabela(), e);
     }
 }

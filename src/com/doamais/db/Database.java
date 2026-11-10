@@ -1,5 +1,7 @@
 package com.doamais.db;
 
+import com.doamais.exception.DoaMaisException;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -128,7 +130,12 @@ public final class Database {
             throw new IllegalStateException("Falha ao inicializar o banco de dados", e);
         }
 
-        // TODO(Gabriel): carregar os dados da demonstracao quando o banco estiver vazio:
-        //   try { CsvUtil.carregarDadosIniciais(); } catch (DoaMaisException e) { ... }
+        // Carrega os dados da demonstracao (dados/seed/*.csv) quando o banco estiver vazio.
+        // Uma falha aqui so gera um aviso: o servidor continua funcionando.
+        try {
+            CsvUtil.carregarDadosIniciais();
+        } catch (DoaMaisException e) {
+            System.err.println("Aviso: dados iniciais nao carregados. " + e.getMessage());
+        }
     }
 }

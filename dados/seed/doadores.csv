@@ -1,0 +1,12 @@
+id;nome;cpf;data_nascimento;sexo;peso;tipo_sanguineo;telefone;email;data_ultima_doacao
+1;Carlos Andrade;12345678901;1991-03-15;M;80;O+;(27) 99811-2233;carlos.andrade@email.com;2026-10-29
+2;Ana Souza;23456789012;1998-06-10;F;62;O+;(27) 99722-3344;ana.souza@email.com;
+3;Bruno Lima;34567890123;1985-09-22;M;78.5;O+;(27) 99633-4455;bruno.lima@email.com;2026-07-05
+4;Juliana Ferreira;45678901234;1993-01-30;F;58;O-;(27) 99544-5566;juliana.ferreira@email.com;2026-07-12
+5;Rafael Costa;56789012345;1979-11-03;M;92;O+;(27) 99455-6677;rafael.costa@email.com;2026-07-19
+6;Fernanda Rocha;67890123456;2000-04-18;F;55;A+;(27) 99366-7788;fernanda.rocha@email.com;2026-06-20
+7;Lucas Martins;78901234567;1996-08-25;M;70;B-;(27) 99277-8899;lucas.martins@email.com;2026-05-14
+8;Patrícia Gomes;89012345678;1988-12-07;F;66;AB+;(27) 99188-9900;patricia.gomes@email.com;
+9;Thiago Alves;90123456789;2002-02-14;M;84;A-;(27) 99099-0011;thiago.alves@email.com;2026-08-02
+10;Camila Ribeiro;01234567890;1990-10-01;F;60;B+;(27) 98900-1122;camila.ribeiro@email.com;2026-08-15
+11;Marcos Pereira;11223344556;1983-05-27;M;88;B-;(27) 98811-2233;marcos.pereira@email.com;2026-05-20

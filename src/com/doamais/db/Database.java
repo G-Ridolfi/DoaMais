@@ -127,5 +127,8 @@ public final class Database {
         } catch (SQLException e) {
             throw new IllegalStateException("Falha ao inicializar o banco de dados", e);
         }
+
+        // TODO(Gabriel): carregar os dados da demonstracao quando o banco estiver vazio:
+        //   try { CsvUtil.carregarDadosIniciais(); } catch (DoaMaisException e) { ... }
     }
 }

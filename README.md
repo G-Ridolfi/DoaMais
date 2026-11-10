@@ -17,6 +17,8 @@ Projeto integrado das disciplinas **Projeto Integrador II** e **Linguagem de Pro
 3. Peça no chat:
    > **Faça a tarefa do &lt;seu nome&gt;.**
 
+   Para mais garantia, use o **prompt pronto** do seu nome em [`docs/PROMPTS.md`](docs/PROMPTS.md). Lá também há prompts para atualizar sua parte depois que os colegas subirem e para estudar para a apresentação.
+
 O Antigravity lê as regras em [`.agent/rules/padrao-do-grupo.md`](.agent/rules/padrao-do-grupo.md) e segue o roteiro: atualiza a `main`, cria sua branch, lê **sua tarefa** em [`docs/tarefas/`](docs/tarefas/), implementa só os `TODO(<seu nome>)`, compila, testa, faz commit e push, e te devolve o link do Pull Request.
 
 4. Abra o **Pull Request** pelo link, revise e faça o merge na `main`. Avise o grupo.

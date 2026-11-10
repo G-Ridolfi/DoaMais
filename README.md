@@ -7,7 +7,7 @@ Projeto integrado das disciplinas **Projeto Integrador II** e **Linguagem de Pro
 
 ---
 
-## 🚀 Como cada integrante trabalha (com o Antigravity)
+## 🚀 Como cada integrante trabalha
 
 1. **Uma vez só:** aceite o convite de colaborador no GitHub, instale **Git** e **JDK 17+**, e clone:
    ```

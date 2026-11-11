@@ -2,6 +2,7 @@ package com.doamais;
 
 import com.doamais.db.Database;
 import com.doamais.handler.AptidaoHandler;
+import com.doamais.handler.ArquivoEstaticoHandler;
 import com.doamais.handler.DoacaoHandler;
 import com.doamais.handler.DoadorHandler;
 import com.doamais.handler.ExportarHandler;
@@ -44,8 +45,8 @@ public class Main {
         servidor.createContext("/campanhas", new ReceptorHandler());
         servidor.createContext("/doacoes", new DoacaoHandler());
         servidor.createContext("/exportar", new ExportarHandler());
-        // TODO(Maria): servidor.createContext("/static/", ...) servindo os arquivos da pasta web/
-        //   (style.css, app.js) com o Content-Type correto; bloquear ".." no caminho.
+        // Arquivos estaticos (style.css, app.js) da pasta web/; ".." e bloqueado no handler
+        servidor.createContext("/static/", new ArquivoEstaticoHandler("web"));
 
         // Varias threads: o servidor atende requisicoes em paralelo
         servidor.setExecutor(Executors.newFixedThreadPool(8));

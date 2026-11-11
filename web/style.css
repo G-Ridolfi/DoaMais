@@ -1,0 +1,355 @@
+/* =========================================================
+   DoaMais - folha de estilo (mobile first)
+   Identidade: vinho #7a1020, fundo claro, cards com sombra suave.
+   Responsavel: Maria Vitoria.
+   ========================================================= */
+
+:root {
+    --vinho: #7a1020;
+    --vinho-escuro: #5a0b17;
+    --vinho-claro: #f8e9eb;
+    --fundo: #f7f5f5;
+    --texto: #2b2b2b;
+    --texto-suave: #666;
+    --borda: #e2dcdc;
+    --branco: #fff;
+    --sombra: 0 2px 10px rgba(0, 0, 0, 0.08);
+    --raio: 10px;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a { color: var(--vinho); }
+
+h1, h2, h3 { line-height: 1.25; }
+h1 { color: var(--vinho); font-size: 1.6rem; margin: 1.25rem 0 1rem; }
+h2 { font-size: 1.25rem; margin: 1.5rem 0 0.75rem; }
+h3 { font-size: 1.1rem; margin: 0; }
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+main.container { flex: 1; padding-bottom: 2rem; }
+
+/* ---------- Cabecalho e menu ---------- */
+.topo {
+    background: var(--vinho);
+    color: var(--branco);
+    box-shadow: var(--sombra);
+}
+
+.topo-conteudo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.logo {
+    color: var(--branco);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;          /* quebra linha no celular */
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.menu a {
+    color: var(--branco);
+    text-decoration: none;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.menu a:hover,
+.menu a:focus,
+.menu a.ativo { background: rgba(255, 255, 255, 0.18); }
+
+/* ---------- Rodape ---------- */
+.rodape {
+    background: #2b2b2b;
+    color: #ddd;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* ---------- Botoes ---------- */
+.botao,
+button,
+input[type="submit"] {
+    display: inline-block;
+    background: var(--vinho);
+    color: var(--branco);
+    border: 2px solid var(--vinho);
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.botao:hover,
+button:hover,
+input[type="submit"]:hover { background: var(--vinho-escuro); border-color: var(--vinho-escuro); }
+
+.botao-secundario {
+    background: var(--branco);
+    color: var(--vinho);
+}
+
+.botao-secundario:hover { background: var(--vinho-claro); color: var(--vinho); }
+
+.botao-grande { padding: 0.8rem 1.4rem; font-size: 1.05rem; }
+
+/* ---------- Alertas ---------- */
+.alerta {
+    padding: 0.85rem 1rem;
+    border-radius: var(--raio);
+    border-left: 5px solid;
+    margin: 1rem 0;
+    white-space: pre-line;   /* respeita quebras de linha das mensagens */
+}
+
+.alerta-sucesso { background: #e8f5e9; border-color: #2e7d32; color: #1b5e20; }
+.alerta-erro    { background: #fdecea; border-color: #c62828; color: #8e1b1b; }
+.alerta-aviso   { background: #fff4e5; border-color: #ef6c00; color: #8a4500; }
+.alerta-info    { background: #e8f1fb; border-color: #1565c0; color: #0d3c78; }
+
+/* ---------- Termometro do HEMOES ---------- */
+.secao-termometro {
+    background: var(--branco);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    padding: 1rem;
+}
+
+.secao-termometro h2 { margin-top: 0; }
+
+.termometro {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);   /* 2 linhas de 4 no celular */
+    gap: 0.6rem;
+}
+
+.badge-estoque {
+    color: var(--branco);
+    border-radius: var(--raio);
+    padding: 0.7rem 0.3rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--sombra);
+}
+
+.badge-estoque strong { font-size: 1.5rem; line-height: 1.1; }
+.badge-estoque span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.critico { animation: pulsar 1.4s ease-in-out infinite; }
+
+@keyframes pulsar {
+    0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.6); }
+    50%      { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(198, 40, 40, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .critico { animation: none; outline: 3px solid #fff; outline-offset: -6px; }
+}
+
+/* ---------- Atalhos ---------- */
+.atalhos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+}
+
+.atalhos .botao { flex: 1 1 240px; text-align: center; }
+
+/* ---------- Cards e feed ---------- */
+.grade-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    background: var(--branco);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.card p { margin: 0; }
+
+.card-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.card-hospital { color: var(--texto-suave); font-size: 0.95rem; }
+
+.card-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.card-acoes .botao { flex: 1; text-align: center; font-size: 0.95rem; }
+
+.badge-tipo {
+    background: var(--vinho);
+    color: var(--branco);
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* ---------- Barra de progresso ---------- */
+.progresso {
+    position: relative;
+    background: #eee;
+    border-radius: 999px;
+    height: 1.4rem;
+    overflow: hidden;
+}
+
+.progresso-barra {
+    height: 100%;
+    background: linear-gradient(90deg, #b3182f, var(--vinho));
+    border-radius: 999px;
+    transition: width 0.6s ease;
+}
+
+.progresso span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--texto);
+    text-shadow: 0 0 3px #fff;
+}
+
+/* ---------- Formularios ---------- */
+form {
+    background: var(--branco);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    padding: 1.25rem;
+    max-width: 640px;
+}
+
+label {
+    display: block;           /* label em cima do campo */
+    font-weight: 600;
+    margin: 0.9rem 0 0.3rem;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--branco);
+}
+
+input[type="radio"],
+input[type="checkbox"] { width: auto; margin-right: 0.3rem; }
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--vinho);
+    box-shadow: 0 0 0 3px rgba(122, 16, 32, 0.15);
+}
+
+input.invalido,
+select.invalido,
+textarea.invalido { border-color: #c62828; background: #fff7f7; }
+
+.erro-campo { color: #c62828; font-size: 0.85rem; margin-top: 0.2rem; }
+
+textarea { min-height: 110px; resize: vertical; }
+
+form button,
+form input[type="submit"] { margin-top: 1.25rem; width: 100%; }
+
+.previa-aptidao { margin-top: 1rem; }
+
+/* ---------- Tabelas ---------- */
+.tabela-container { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--branco);
+    border-radius: var(--raio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+}
+
+th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--borda); }
+
+th { background: var(--vinho); color: var(--branco); font-weight: 600; }
+
+tbody tr:nth-child(even) { background: #faf6f6; }   /* zebra */
+
+tbody tr:hover { background: var(--vinho-claro); }
+
+.lista-exportar li { margin: 0.4rem 0; }
+
+/* ---------- Telas maiores ---------- */
+@media (min-width: 720px) {
+    h1 { font-size: 2rem; }
+    .menu { width: auto; }
+    .termometro { grid-template-columns: repeat(8, 1fr); }   /* 8 lado a lado */
+    form button,
+    form input[type="submit"] { width: auto; }
+}

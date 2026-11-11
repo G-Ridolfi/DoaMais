@@ -5,7 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -24,13 +28,30 @@ import java.util.Map;
  */
 public final class FormUtil {
 
+    /**
+     * COLECAO (Map): nome tecnico do campo -> nome amigavel usado nas
+     * mensagens de erro. Campos fora do mapa aparecem com o proprio nome.
+     */
+    private static final Map<String, String> NOMES_AMIGAVEIS = new LinkedHashMap<>();
+
+    static {
+        NOMES_AMIGAVEIS.put("dataNascimento", "data de nascimento");
+        NOMES_AMIGAVEIS.put("dataUltimaDoacao", "data da última doação");
+        NOMES_AMIGAVEIS.put("dataDoacao", "data da doação");
+        NOMES_AMIGAVEIS.put("tipoSanguineo", "tipo sanguíneo");
+        NOMES_AMIGAVEIS.put("nomePaciente", "nome do paciente");
+        NOMES_AMIGAVEIS.put("metaDoacoes", "meta de doações");
+        NOMES_AMIGAVEIS.put("doadorId", "doador");
+        NOMES_AMIGAVEIS.put("receptorId", "campanha");
+        NOMES_AMIGAVEIS.put("historia", "história");
+    }
+
     private FormUtil() {
     }
 
     /** Le o corpo inteiro da requisicao como texto UTF-8. */
     public static String lerCorpo(HttpExchange ex) throws IOException {
-        // TODO(Maria): new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.lerCorpo");
+        return new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
     }
 
     /**
@@ -40,14 +61,33 @@ public final class FormUtil {
      * @param dados corpo do POST ou query string; null/vazio -> mapa vazio
      */
     public static Map<String, String> parse(String dados) {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.parse");
+        // COLECAO: LinkedHashMap mantem a ordem em que os campos chegaram
+        Map<String, String> campos = new LinkedHashMap<>();
+        if (dados == null || dados.isEmpty()) {
+            return campos;
+        }
+        // 1) cada par "chave=valor" e separado por '&'
+        for (String par : dados.split("&")) {
+            if (par.isEmpty()) {
+                continue; // ignora pares vazios (ex: "a=1&&b=2")
+            }
+            // 2) separa pelo PRIMEIRO '=' (o valor pode conter '=' codificado ou nao)
+            int igual = par.indexOf('=');
+            String chave = igual >= 0 ? par.substring(0, igual) : par;
+            String valor = igual >= 0 ? par.substring(igual + 1) : "";
+            // 3) decodifica %XX e '+' (espaco) usando UTF-8
+            chave = URLDecoder.decode(chave, StandardCharsets.UTF_8);
+            valor = URLDecoder.decode(valor, StandardCharsets.UTF_8);
+            if (!chave.isEmpty()) {
+                campos.put(chave, valor);
+            }
+        }
+        return campos;
     }
 
     /** Parametros da URL (ex: /campanhas/ver?id=3 -> {id=3}). */
     public static Map<String, String> parseQuery(URI uri) {
-        // TODO(Maria): parse(uri.getRawQuery())
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.parseQuery");
+        return parse(uri.getRawQuery());
     }
 
     /**
@@ -56,27 +96,42 @@ public final class FormUtil {
      */
     public static String getTexto(Map<String, String> form, String campo, boolean obrigatorio)
             throws ValidacaoException {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.getTexto");
+        String valor = form.get(campo);
+        valor = (valor == null) ? "" : valor.trim();
+        if (valor.isEmpty()) {
+            if (obrigatorio) {
+                throw new ValidacaoException("O campo '" + nomeAmigavel(campo) + "' é obrigatório.");
+            }
+            return null;
+        }
+        return valor;
     }
 
     /** Campo inteiro obrigatorio. */
     public static int getInt(Map<String, String> form, String campo) throws ValidacaoException {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.getInt");
+        String valor = getTexto(form, campo, true);
+        return converterInt(valor, campo);
     }
 
     /** Campo inteiro opcional: null se vazio (ex: receptorId = estoque geral). */
     public static Integer getIntOpcional(Map<String, String> form, String campo)
             throws ValidacaoException {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.getIntOpcional");
+        String valor = getTexto(form, campo, false);
+        if (valor == null) {
+            return null;
+        }
+        return converterInt(valor, campo);
     }
 
     /** Campo decimal obrigatorio. Aceita virgula ou ponto ("72,5" ou "72.5"). */
     public static double getDouble(Map<String, String> form, String campo) throws ValidacaoException {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.getDouble");
+        String valor = getTexto(form, campo, true);
+        try {
+            return Double.parseDouble(valor.replace(',', '.'));
+        } catch (NumberFormatException e) {
+            // TRATAMENTO DE EXCECAO: converte o erro tecnico em mensagem amigavel
+            throw new ValidacaoException("O campo '" + nomeAmigavel(campo) + "' deve ser um número.", e);
+        }
     }
 
     /**
@@ -86,7 +141,30 @@ public final class FormUtil {
      */
     public static LocalDate getData(Map<String, String> form, String campo, boolean obrigatorio)
             throws ValidacaoException {
-        // TODO(Maria)
-        throw new UnsupportedOperationException("TODO(Maria): FormUtil.getData");
+        String valor = getTexto(form, campo, obrigatorio);
+        if (valor == null) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(valor);
+        } catch (DateTimeParseException e) {
+            throw new ValidacaoException("O campo '" + nomeAmigavel(campo)
+                    + "' deve ser uma data válida (dd/mm/aaaa).", e);
+        }
+    }
+
+    /** Converte texto em int, lancando ValidacaoException com a causa original. */
+    private static int converterInt(String valor, String campo) throws ValidacaoException {
+        try {
+            return Integer.parseInt(valor);
+        } catch (NumberFormatException e) {
+            throw new ValidacaoException("O campo '" + nomeAmigavel(campo)
+                    + "' deve ser um número inteiro.", e);
+        }
+    }
+
+    /** @return nome legivel do campo para mensagens (ex: dataNascimento -> data de nascimento) */
+    private static String nomeAmigavel(String campo) {
+        return NOMES_AMIGAVEIS.getOrDefault(campo, campo);
     }
 }

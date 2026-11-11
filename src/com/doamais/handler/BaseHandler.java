@@ -1,10 +1,13 @@
 package com.doamais.handler;
 
 import com.doamais.exception.DoaMaisException;
+import com.doamais.util.FormUtil;
+import com.doamais.util.HtmlUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -37,10 +40,46 @@ import java.util.Map;
  */
 public abstract class BaseHandler implements HttpHandler {
 
+    /** Botao "Voltar" usado nas paginas de erro (volta para o formulario preenchido). */
+    private static final String BOTAO_VOLTAR =
+            "<p><a class=\"botao\" href=\"javascript:history.back()\">&larr; Voltar</a></p>";
+
+    /**
+     * TEMPLATE METHOD: o "esqueleto" do atendimento e sempre o mesmo; so os
+     * passos get()/post() mudam. POLIMORFISMO: em tempo de execucao, get(ex)
+     * executa a versao sobrescrita do handler concreto (HomeHandler,
+     * DoadorHandler, ...), sem que esta classe saiba qual e.
+     */
     @Override
     public void handle(HttpExchange ex) throws IOException {
-        // TODO(Maria): implementar conforme o Javadoc da classe
-        throw new UnsupportedOperationException("TODO(Maria): BaseHandler.handle");
+        try {
+            String metodo = ex.getRequestMethod().toUpperCase();
+            if ("GET".equals(metodo)) {
+                get(ex);                                            // polimorfismo
+            } else if ("POST".equals(metodo)) {
+                post(ex, FormUtil.parse(FormUtil.lerCorpo(ex)));    // polimorfismo
+            } else {
+                enviarMetodoNaoPermitido(ex);
+            }
+        } catch (DoaMaisException e) {
+            // TRATAMENTO DE EXCECAO: ValidacaoException, DAOException e
+            // DoadorInaptoException herdam de DoaMaisException e viram um alerta.
+            if (respostaAindaNaoEnviada(ex)) {
+                enviarHtml(ex, 400, HtmlUtil.pagina("Atenção",
+                        HtmlUtil.alerta("erro", e.getMessage()) + BOTAO_VOLTAR));
+            }
+        } catch (Exception e) {
+            // Erro inesperado (bug, TODO de colega, etc.): registra no console e
+            // responde 500. O servidor continua de pe para as proximas requisicoes.
+            e.printStackTrace();
+            if (respostaAindaNaoEnviada(ex)) {
+                enviarHtml(ex, 500, HtmlUtil.pagina("Ops! Algo deu errado.",
+                        HtmlUtil.alerta("erro", "Ocorreu um erro inesperado. Tente novamente em instantes.")
+                                + BOTAO_VOLTAR));
+            }
+        } finally {
+            ex.close();
+        }
     }
 
     /** Responde a um GET. Todo handler implementa. */
@@ -53,15 +92,17 @@ public abstract class BaseHandler implements HttpHandler {
      * @param form campos do formulario ja decodificados
      */
     protected void post(HttpExchange ex, Map<String, String> form) throws DoaMaisException, IOException {
-        // TODO(Maria): responder 405
-        throw new UnsupportedOperationException("TODO(Maria): BaseHandler.post");
+        enviarMetodoNaoPermitido(ex);
     }
 
     /** Envia bytes com o status e Content-Type informados. */
     protected void enviarResposta(HttpExchange ex, int status, String contentType, byte[] corpo)
             throws IOException {
-        // TODO(Maria): headers Content-Type, sendResponseHeaders, escrever corpo
-        throw new UnsupportedOperationException("TODO(Maria): BaseHandler.enviarResposta");
+        ex.getResponseHeaders().set("Content-Type", contentType);
+        ex.sendResponseHeaders(status, corpo.length);
+        try (OutputStream saida = ex.getResponseBody()) {
+            saida.write(corpo);
+        }
     }
 
     /** Envia uma pagina HTML (UTF-8) com o status informado. */
@@ -79,18 +120,30 @@ public abstract class BaseHandler implements HttpHandler {
      * (padrao Post/Redirect/Get), ex: redirecionar(ex, "/campanhas/ver?id=3").
      */
     protected void redirecionar(HttpExchange ex, String url) throws IOException {
-        // TODO(Maria): header Location + sendResponseHeaders(303, -1)
-        throw new UnsupportedOperationException("TODO(Maria): BaseHandler.redirecionar");
+        ex.getResponseHeaders().set("Location", url);
+        ex.sendResponseHeaders(303, -1);
     }
 
     /** @return valor do parametro da URL (?nome=valor), ou null se ausente */
     protected String getParametro(HttpExchange ex, String nome) {
-        // TODO(Maria): FormUtil.parseQuery(ex.getRequestURI()).get(nome)
-        throw new UnsupportedOperationException("TODO(Maria): BaseHandler.getParametro");
+        return FormUtil.parseQuery(ex.getRequestURI()).get(nome);
     }
 
     /** @return caminho da URL sem a query, ex: "/doadores/novo" */
     protected String getCaminho(HttpExchange ex) {
         return ex.getRequestURI().getPath();
+    }
+
+    /** Pagina 405 (metodo HTTP nao suportado por esta rota). */
+    private void enviarMetodoNaoPermitido(HttpExchange ex) throws IOException {
+        ex.getResponseHeaders().set("Allow", "GET, POST");
+        enviarHtml(ex, 405, HtmlUtil.pagina("Método não permitido",
+                HtmlUtil.alerta("aviso", "Esta página não aceita o método " + ex.getRequestMethod() + ".")
+                        + BOTAO_VOLTAR));
+    }
+
+    /** @return true se nenhum status foi enviado ainda (getResponseCode() == -1) */
+    private boolean respostaAindaNaoEnviada(HttpExchange ex) {
+        return ex.getResponseCode() == -1;
     }
 }

@@ -1,10 +1,9 @@
 package com.doamais.db;
 
-import com.doamais.exception.DoaMaisException;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -12,7 +11,8 @@ import java.sql.Statement;
  * Infraestrutura de banco de dados do DoaMais.
  *
  * Gerencia o ciclo de vida da conexao JDBC com o SQLite (arquivo local
- * database/doamais.db) e cria automaticamente as tabelas no primeiro boot.
+ * database/doamais.db), cria automaticamente as tabelas no primeiro boot e
+ * popula os dados iniciais da demonstracao quando o banco estiver vazio.
  *
  * Uso nos DAOs:
  * <pre>
@@ -22,6 +22,8 @@ import java.sql.Statement;
  * Cada chamada a getConnection() devolve uma conexao nova, que deve ser
  * fechada pelo chamador (try-with-resources). Isso evita problemas de
  * concorrencia, ja que o HttpServer atende requisicoes em varias threads.
+ *
+ * Responsavel: Gabriel.
  */
 public final class Database {
 
@@ -47,7 +49,8 @@ public final class Database {
     }
 
     /**
-     * Cria a pasta do banco e todas as tabelas, se ainda nao existirem.
+     * Cria a pasta do banco, todas as tabelas e os dados iniciais da
+     * demonstracao, se ainda nao existirem.
      * Deve ser chamado uma unica vez na inicializacao (Main.java).
      * E idempotente: pode ser chamado varias vezes sem perder dados.
      */
@@ -126,16 +129,57 @@ public final class Database {
                     ('A+','NORMAL'),('A-','BAIXO'),('B+','NORMAL'),('B-','CRITICO'),
                     ('AB+','ALTO'),('AB-','BAIXO'),('O+','NORMAL'),('O-','CRITICO')""");
 
+            carregarDadosIniciais(st);
+
         } catch (SQLException e) {
             throw new IllegalStateException("Falha ao inicializar o banco de dados", e);
         }
+    }
 
-        // Carrega os dados da demonstracao (dados/seed/*.csv) quando o banco estiver vazio.
-        // Uma falha aqui so gera um aviso: o servidor continua funcionando.
-        try {
-            CsvUtil.carregarDadosIniciais();
-        } catch (DoaMaisException e) {
-            System.err.println("Aviso: dados iniciais nao carregados. " + e.getMessage());
+    /**
+     * Popula o banco com os dados iniciais da demonstracao (doadores,
+     * campanhas e doacoes) apenas se a tabela doadores estiver vazia.
+     */
+    private static void carregarDadosIniciais(Statement st) throws SQLException {
+        try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM doadores")) {
+            if (rs.next() && rs.getInt(1) > 0) {
+                return;
+            }
         }
+
+        st.execute("""
+            INSERT INTO doadores (id, nome, cpf, data_nascimento, sexo, peso, tipo_sanguineo, telefone, email, data_ultima_doacao) VALUES
+                (1,  'Carlos Andrade',   '12345678901', '1991-03-15', 'M', 80.0, 'O+',  '(27) 99811-2233', 'carlos.andrade@email.com',   '2026-10-29'),
+                (2,  'Ana Souza',        '23456789012', '1998-06-10', 'F', 62.0, 'O+',  '(27) 99722-3344', 'ana.souza@email.com',        NULL),
+                (3,  'Bruno Lima',       '34567890123', '1985-09-22', 'M', 78.5, 'O+',  '(27) 99633-4455', 'bruno.lima@email.com',       '2026-07-05'),
+                (4,  'Juliana Ferreira', '45678901234', '1993-01-30', 'F', 58.0, 'O-',  '(27) 99544-5566', 'juliana.ferreira@email.com', '2026-07-12'),
+                (5,  'Rafael Costa',     '56789012345', '1979-11-03', 'M', 92.0, 'O+',  '(27) 99455-6677', 'rafael.costa@email.com',     '2026-07-19'),
+                (6,  'Fernanda Rocha',   '67890123456', '2000-04-18', 'F', 55.0, 'A+',  '(27) 99366-7788', 'fernanda.rocha@email.com',   '2026-06-20'),
+                (7,  'Lucas Martins',    '78901234567', '1996-08-25', 'M', 70.0, 'B-',  '(27) 99277-8899', 'lucas.martins@email.com',    '2026-05-14'),
+                (8,  'Patrícia Gomes',   '89012345678', '1988-12-07', 'F', 66.0, 'AB+', '(27) 99188-9900', 'patricia.gomes@email.com',   NULL),
+                (9,  'Thiago Alves',     '90123456789', '2002-02-14', 'M', 84.0, 'A-',  '(27) 99099-0011', 'thiago.alves@email.com',     '2026-08-02'),
+                (10, 'Camila Ribeiro',   '01234567890', '1990-10-01', 'F', 60.0, 'B+',  '(27) 98900-1122', 'camila.ribeiro@email.com',   '2026-08-15'),
+                (11, 'Marcos Pereira',   '11223344556', '1983-05-27', 'M', 88.0, 'B-',  '(27) 98811-2233', 'marcos.pereira@email.com',   '2026-05-20')
+            """);
+
+        st.execute("""
+            INSERT INTO receptores (id, nome_paciente, hospital, historia, tipo_sanguineo, meta_doacoes, doacoes_recebidas, status, data_criacao) VALUES
+                (1, 'Maria Clara',    'Hospital Estadual Infantil',                   'Maria Clara tem 8 anos e está em tratamento contra a leucemia. Ela precisa de transfusões frequentes e cada bolsa doada ajuda a manter o tratamento em dia.', 'O+', 5, 3, 'ATIVA',     '2026-06-28'),
+                (2, 'José Henrique',  'Hospital Universitário Cassiano Antônio Moraes','José Henrique, 52 anos, vai passar por uma cirurgia cardíaca e precisa repor o estoque de sangue A- usado no procedimento.',                                  'A-', 4, 1, 'ATIVA',     '2026-07-25'),
+                (3, 'Lourdes Batista','Santa Casa de Misericórdia de Vitória',        'Dona Lourdes, 67 anos, sofreu um acidente e precisou de transfusões. Graças aos doadores a campanha foi concluída.',                                         'B-', 2, 2, 'CONCLUIDA', '2026-05-02')
+            """);
+
+        st.execute("""
+            INSERT INTO doacoes (id, doador_id, receptor_id, data_doacao, local) VALUES
+                (1, 3,  1,    '2026-07-05', 'HEMOES - Vitória'),
+                (2, 4,  1,    '2026-07-12', 'HEMOES - Vitória'),
+                (3, 5,  1,    '2026-07-19', 'HEMOES - Vitória'),
+                (4, 7,  3,    '2026-05-14', 'HEMOES - Vitória'),
+                (5, 11, 3,    '2026-05-20', 'Hemocentro Regional de Colatina'),
+                (6, 9,  2,    '2026-08-02', 'HEMOES - Vitória'),
+                (7, 6,  NULL, '2026-06-20', 'Hemocentro Regional de Linhares'),
+                (8, 10, NULL, '2026-08-15', 'HEMOES - Vitória'),
+                (9, 1,  NULL, '2026-10-29', 'HEMOES - Vitória')
+            """);
     }
 }

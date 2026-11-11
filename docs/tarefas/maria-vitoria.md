@@ -44,7 +44,7 @@ Siga o Javadoc da classe:
 ### 3. `src/com/doamais/util/HtmlUtil.java`: completar os `TODO(Maria)`
 Cada método está descrito no Javadoc. Detalhes:
 - `escapar`: `&` primeiro, depois `<`, `>`, `"`, `'`.
-- `pagina(titulo, conteudo)`: `<!DOCTYPE html>`, `lang="pt-BR"`, `meta viewport`, `<link rel="stylesheet" href="/static/style.css">`, `<script src="/static/app.js" defer>`, cabeçalho com logo "🩸 DoaMais" e o **menu** (Início, Doadores, Pré-triagem, Nova campanha, Doações, Exportar), `<main>` com `<h1>` + conteúdo, rodapé ("DoaMais – Projeto Integrador II / LPOO · ODS 3 Saúde e Bem-Estar").
+- `pagina(titulo, conteudo)`: `<!DOCTYPE html>`, `lang="pt-BR"`, `meta viewport`, `<link rel="stylesheet" href="/static/style.css">`, `<script src="/static/app.js" defer>`, cabeçalho com logo "🩸 DoaMais" e o **menu** (Início, Doadores, Pré-triagem, Nova campanha, Doações), `<main>` com `<h1>` + conteúdo, rodapé ("DoaMais – Projeto Integrador II / LPOO · ODS 3 Saúde e Bem-Estar").
 - `alerta(tipo, msg)`: `<div class="alerta alerta-<tipo>">`.
 - `barraProgresso(p)`: `<div class="progresso"><div class="progresso-barra" style="width:NN%"></div><span>NN%</span></div>` (arredondar).
 - `cardCampanha(Receptor r)`: nome, hospital, badge do tipo, "X de Y bolsas", barra, links "Ver campanha" e **"Quero doar"** (ver Javadoc). Usa `r.getProgresso()` (Ricardo).

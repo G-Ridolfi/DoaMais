@@ -5,7 +5,6 @@ import com.doamais.handler.AptidaoHandler;
 import com.doamais.handler.ArquivoEstaticoHandler;
 import com.doamais.handler.DoacaoHandler;
 import com.doamais.handler.DoadorHandler;
-import com.doamais.handler.ExportarHandler;
 import com.doamais.handler.HomeHandler;
 import com.doamais.handler.ReceptorHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -25,7 +24,6 @@ import java.util.concurrent.Executors;
  *   /aptidao    AptidaoHandler   (Guilherme)
  *   /campanhas  ReceptorHandler  (Ricardo)
  *   /doacoes    DoacaoHandler    (Amon)
- *   /exportar   ExportarHandler  (Gabriel)
  *   /static/    arquivos de web/ (Maria Vitoria)
  * </pre>
  *
@@ -44,7 +42,6 @@ public class Main {
         servidor.createContext("/aptidao", new AptidaoHandler());
         servidor.createContext("/campanhas", new ReceptorHandler());
         servidor.createContext("/doacoes", new DoacaoHandler());
-        servidor.createContext("/exportar", new ExportarHandler());
         // Arquivos estaticos (style.css, app.js) da pasta web/; ".." e bloqueado no handler
         servidor.createContext("/static/", new ArquivoEstaticoHandler("web"));
 

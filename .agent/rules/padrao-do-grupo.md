@@ -69,7 +69,7 @@ Se o nome não estiver claro, **pergunte** antes de começar.
 
 ## 3. Requisitos do edital de LPOO (todos precisam aparecer no código)
 
-Herança · Polimorfismo · Tratamento de exceção · Coleções · Leitura e gravação (banco/CSV) · Interface gráfica.
+Herança · Polimorfismo · Tratamento de exceção · Coleções · Leitura e gravação (banco de dados SQLite) · Interface gráfica.
 Cada tarefa indica quais conceitos aquele integrante deve demonstrar. **Implemente de forma que o conceito fique evidente**: use `@Override`, comente onde há polimorfismo e use os tipos de coleção pedidos.
 
 ## 4. Padrões de código (vale nota de legibilidade)

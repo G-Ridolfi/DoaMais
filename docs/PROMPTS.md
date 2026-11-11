@@ -31,7 +31,7 @@ Antes de escrever código, leia por completo:
 
 Regras:
 - Trabalhe na branch feat/gabriel-dados, criada a partir da main atualizada (git checkout main, git pull).
-- Implemente SOMENTE os métodos marcados com TODO(Gabriel) e os arquivos novos pedidos na tarefa, incluindo os CSVs de dados/seed/.
+- Implemente SOMENTE os métodos marcados com TODO(Gabriel) e os arquivos novos pedidos na tarefa.
 - NÃO altere assinaturas existentes, NÃO edite arquivos de outros integrantes, NÃO adicione bibliotecas, NÃO faça push na main.
 - Se algo da tarefa for impossível sem mexer na parte de um colega, pare e me explique.
 - Compile com build.bat compilar até dar "Compilacao OK", crie e rode o teste com build.bat com.doamais.teste.PersistenciaTeste.

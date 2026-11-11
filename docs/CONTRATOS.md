@@ -11,7 +11,7 @@ Este documento define **como os módulos conversam entre si**. As assinaturas j�
 | Pacote | Arquivo | Responsável |
 |---|---|---|
 | `com.doamais` | `Main` | Maria Vitória |
-| `db` | `Database` ✅ pronto, `CsvUtil` | Gabriel |
+| `db` | `Database` ✅ pronto | Gabriel |
 | `exception` | `DoaMaisException` ✅, `DAOException` ✅, `ValidacaoException` ✅ | Gabriel |
 | `exception` | `DoadorInaptoException` ✅ | Guilherme |
 | `model` | `Pessoa` ✅, `TipoSanguineo` ✅, `Sexo` ✅, `Doador` | Pedro |
@@ -28,11 +28,9 @@ Este documento define **como os módulos conversam entre si**. As assinaturas j�
 | `handler` | `AptidaoHandler` | Guilherme |
 | `handler` | `ReceptorHandler` | Ricardo |
 | `handler` | `DoacaoHandler` | Amon |
-| `handler` | `ExportarHandler` | Gabriel |
 | `util` | `FormUtil`, `HtmlUtil` | Maria Vitória |
 | `teste` | `DatabaseTeste` ✅ + um teste por integrante | cada um |
 | `web/` | `style.css`, `app.js` | Maria Vitória |
-| `dados/seed/` | `doadores.csv`, `receptores.csv`, `doacoes.csv` | Gabriel |
 
 ✅ = contrato já completo (só ajustar Javadoc/explicar na apresentação).
 
@@ -63,7 +61,6 @@ classDiagram
     BaseHandler <|-- AptidaoHandler
     BaseHandler <|-- ReceptorHandler
     BaseHandler <|-- DoacaoHandler
-    BaseHandler <|-- ExportarHandler
     Doacao --> Doador
     Doacao --> Receptor
 ```
@@ -103,7 +100,6 @@ Conexão: sempre `try (Connection c = Database.getConnection(); PreparedStatemen
 | `/aptidao` | `AptidaoHandler` (Guilherme) | `GET /aptidao[?doadorId=]` · `POST /aptidao` |
 | `/campanhas` | `ReceptorHandler` (Ricardo) | `GET/POST /campanhas/nova` · `GET /campanhas/ver?id=` |
 | `/doacoes` | `DoacaoHandler` (Amon) | `GET /doacoes` · `GET /doacoes/nova[?receptorId=]` · `POST /doacoes/nova` |
-| `/exportar` | `ExportarHandler` (Gabriel) | `GET /exportar` · `GET /exportar?tabela=doadores` |
 | `/static/` | (Maria, no `Main`) | `/static/style.css`, `/static/app.js` (pasta `web/`) |
 
 Depois de um POST bem-sucedido: `redirecionar(ex, ...)` (padrão Post/Redirect/Get).
@@ -158,4 +154,4 @@ Enquanto a parte de um colega não estiver na `main`, os testes que a usam vão 
 3. Pré-triagem/registro de doação para um **homem que doou há 25 dias** → bloqueado, com a data de liberação.
 4. Registro de doação de um doador apto para a Maria Clara → barra vai para **4/5 (80%)**.
 
-Os dados vêm de `dados/seed/*.csv` (Gabriel). A apresentação é em **23/11/2026**: o doador "doou há 25 dias" deve ter `data_ultima_doacao = 2026-10-29`.
+Os dados iniciais são inseridos automaticamente por `Database.inicializar()` (Gabriel). A apresentação é em **23/11/2026**: o doador "doou há 25 dias" deve ter `data_ultima_doacao = 2026-10-29`.

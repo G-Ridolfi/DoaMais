@@ -26,7 +26,7 @@ O Antigravity lê as regras em [`.agent/rules/padrao-do-grupo.md`](.agent/rules/
 
 | Integrante | Tarefa | Módulo |
 |---|---|---|
-| Gabriel Ridolfi Pupim | [gabriel.md](docs/tarefas/gabriel.md) | Dados, persistência (SQLite + CSV) e exceções |
+| Gabriel Ridolfi Pupim | [gabriel.md](docs/tarefas/gabriel.md) | Dados, persistência (SQLite) e exceções |
 | Pedro Paulo Rodrigues da Silva | [pedro.md](docs/tarefas/pedro.md) | Doadores |
 | Guilherme Caiado Richa | [guilherme.md](docs/tarefas/guilherme.md) | Motor de regras de aptidão |
 | Ricardo Irineu Sales Machado | [ricardo.md](docs/tarefas/ricardo.md) | Campanhas e receptores |
@@ -57,7 +57,7 @@ O banco `database/doamais.db` é criado automaticamente (não vai para o Git). P
 ```
 src/com/doamais/
   Main.java        servidor e rotas
-  db/              Database (conexão + tabelas), CsvUtil (arquivos CSV)
+  db/              Database (conexão + tabelas + dados iniciais)
   exception/       DoaMaisException e subclasses
   model/           Pessoa (abstrata), Doador, Receptor, Doacao, enums
   dao/             BaseDAO<T> (abstrata genérica) e DAOs
@@ -66,7 +66,6 @@ src/com/doamais/
   util/            FormUtil, HtmlUtil
   teste/           classes de teste (uma por integrante)
 web/               style.css, app.js
-dados/seed/        dados da demonstração (CSV)
 docs/              CONTRATOS.md e tarefas/
 lib/               driver SQLite JDBC
 ```
@@ -81,7 +80,7 @@ lib/               driver SQLite JDBC
 | **Polimorfismo** | `List<RegraAptidao>` no `MotorAptidao` · `getDescricao()`/`validar()` sobrescritos · `mapear()` nos DAOs · `get()`/`post()` nos handlers |
 | **Tratamento de exceção** | `DAOException`, `ValidacaoException`, `DoadorInaptoException` · try-with-resources · tratamento central no `BaseHandler` |
 | **Coleções** | `List` nos DAOs · `EnumMap` no termômetro · `Map` nas estatísticas e no `FormUtil` |
-| **Leitura e gravação** | SQLite via JDBC · exportação/importação CSV (`CsvUtil`, `/exportar`) |
+| **Leitura e gravação** | Banco de dados relacional SQLite via JDBC (`Database`, `BaseDAO<T>`) |
 | **Interface gráfica** | Páginas web (HTML/CSS/JS) servidas pelo próprio Java |
 
 ---

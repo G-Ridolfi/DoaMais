@@ -28,8 +28,7 @@ public final class HtmlUtil {
         {"/doadores", "Doadores"},
         {"/aptidao", "Pré-triagem"},
         {"/campanhas/nova", "Nova campanha"},
-        {"/doacoes", "Doações"},
-        {"/exportar", "Exportar"}
+        {"/doacoes", "Doações"}
     };
 
     private HtmlUtil() {
@@ -51,7 +50,7 @@ public final class HtmlUtil {
     /**
      * Pagina HTML completa: &lt;head&gt; com /static/style.css e /static/app.js,
      * cabecalho com logo e menu (Inicio /, Doadores /doadores, Pre-triagem /aptidao,
-     * Nova campanha /campanhas/nova, Doacoes /doacoes, Exportar /exportar),
+     * Nova campanha /campanhas/nova, Doacoes /doacoes),
      * o conteudo e o rodape.
      *
      * @param titulo       titulo da aba e do &lt;h1&gt; (sera escapado)

@@ -1,7 +1,7 @@
 package com.doamais.exception;
 
 /**
- * Erro de persistencia (banco de dados ou arquivo CSV).
+ * Erro de persistencia no banco de dados SQLite.
  *
  * Regra do projeto: os DAOs NUNCA deixam uma SQLException "vazar" para as
  * outras camadas. Ela e capturada e convertida em DAOException, mantendo a

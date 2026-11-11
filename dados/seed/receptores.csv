@@ -1,4 +1,0 @@
-id;nome_paciente;hospital;historia;tipo_sanguineo;meta_doacoes;doacoes_recebidas;status;data_criacao
-1;Maria Clara;Hospital Estadual Infantil;Maria Clara tem 8 anos e está em tratamento contra a leucemia. Ela precisa de transfusões frequentes e cada bolsa doada ajuda a manter o tratamento em dia.;O+;5;3;ATIVA;2026-06-28
-2;José Henrique;Hospital Universitário Cassiano Antônio Moraes;José Henrique, 52 anos, vai passar por uma cirurgia cardíaca e precisa repor o estoque de sangue A- usado no procedimento.;A-;4;1;ATIVA;2026-07-25
-3;Lourdes Batista;Santa Casa de Misericórdia de Vitória;Dona Lourdes, 67 anos, sofreu um acidente e precisou de transfusões. Graças aos doadores a campanha foi concluída.;B-;2;2;CONCLUIDA;2026-05-02

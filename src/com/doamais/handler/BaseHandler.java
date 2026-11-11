@@ -14,8 +14,8 @@ import java.util.Map;
 /**
  * Classe ABSTRATA que todos os handlers (controladores web) herdam.
  *
- * HERANCA: HomeHandler, DoadorHandler, AptidaoHandler, ReceptorHandler,
- * DoacaoHandler e ExportarHandler estendem BaseHandler.
+ * HERANCA: HomeHandler, DoadorHandler, AptidaoHandler, ReceptorHandler e
+ * DoacaoHandler estendem BaseHandler.
  * POLIMORFISMO (padrao Template Method): handle() e escrito uma unica vez
  * aqui e chama get()/post(), que cada handler sobrescreve.
  *

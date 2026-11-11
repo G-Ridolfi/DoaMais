@@ -1,40 +1,33 @@
 package com.doamais.teste;
 
 import com.doamais.dao.BaseDAO;
-import com.doamais.db.CsvUtil;
 import com.doamais.db.Database;
 import com.doamais.exception.DAOException;
 import com.doamais.exception.DoaMaisException;
-import com.doamais.exception.ValidacaoException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Teste manual da camada de persistencia (BaseDAO + CsvUtil + seed).
+ * Teste manual da camada de persistencia (Database + BaseDAO + DAOException).
  *
  * Nao depende dos DAOs dos colegas: usa uma subclasse ANONIMA de BaseDAO
  * para provar a HERANCA e o POLIMORFISMO (listarTodos() herdado chamando o
  * mapear() definido aqui).
  *
  * Rodar: build.bat com.doamais.teste.PersistenciaTeste
- * (apague database/doamais.db antes para testar o seed do zero).
+ * (apague database/doamais.db antes para testar a carga inicial do zero).
  *
  * Responsavel: Gabriel.
  */
 public class PersistenciaTeste {
 
-    public static void main(String[] args) throws DoaMaisException, IOException {
-        // 1) Cria as tabelas e carrega dados/seed/*.csv se o banco estiver vazio
+    public static void main(String[] args) throws DoaMaisException {
+        // 1) Cria as tabelas e popula os dados iniciais da demonstracao se o banco estiver vazio
         Database.inicializar();
-        System.out.println("== 1) Banco inicializado");
+        System.out.println("== 1) Banco SQLite inicializado com sucesso");
 
         // 2) HERANCA: subclasse anonima de BaseDAO<String> para a tabela receptores
         BaseDAO<String> receptores = new BaseDAO<String>() {
@@ -46,7 +39,8 @@ public class PersistenciaTeste {
             // POLIMORFISMO: listarTodos()/buscarPorId() da BaseDAO chamam ESTE mapear()
             @Override
             protected String mapear(ResultSet rs) throws SQLException {
-                return rs.getInt("id") + " - " + rs.getString("nome_paciente");
+                return rs.getInt("id") + " - " + rs.getString("nome_paciente")
+                        + " (" + rs.getInt("doacoes_recebidas") + "/" + rs.getInt("meta_doacoes") + ")";
             }
 
             @Override
@@ -69,35 +63,19 @@ public class PersistenciaTeste {
         System.out.println("   buscarPorId(1)    = " + primeiro.orElse("(nao encontrado)"));
         System.out.println("   buscarPorId(9999) = " + receptores.buscarPorId(9999).orElse("(nao encontrado)"));
 
-        // 3) GRAVACAO EM ARQUIVO: exporta doadores e conta as linhas geradas
-        File arquivo = new File("out/doadores.csv");
-        CsvUtil.exportar("doadores", arquivo);
-        List<String> linhas = Files.readAllLines(arquivo.toPath(), StandardCharsets.UTF_8);
-        System.out.println("== 3) " + arquivo.getPath() + " gerado com " + linhas.size()
-                + " linhas (1 cabecalho + " + (linhas.size() - 1) + " doadores)");
-        System.out.println("   cabecalho: " + linhas.get(0));
-
-        // 4) TRATAMENTO DE EXCECAO: tabela fora da lista permitida
+        // 3) TRATAMENTO DE EXCECAO: CPF repetido vira DAOException amigavel
         try {
-            CsvUtil.exportar("sqlite_master", new StringWriter());
-            System.out.println("== 4) ERRO: deveria ter lancado ValidacaoException");
-        } catch (ValidacaoException e) {
-            System.out.println("== 4) ValidacaoException capturada: " + e.getMessage());
-        }
-
-        // 5) Extra: CPF repetido vira DAOException amigavel (usado pelo Pedro)
-        try {
-            new DoadorCpfTesteDAO().inserir("12345678901"); // CPF do Carlos Andrade (seed)
-            System.out.println("== 5) ERRO: deveria ter lancado DAOException");
+            new DoadorCpfTesteDAO().inserir("12345678901"); // CPF do Carlos Andrade
+            System.out.println("== 3) ERRO: deveria ter lancado DAOException");
         } catch (DAOException e) {
-            System.out.println("== 5) DAOException capturada: " + e.getMessage());
+            System.out.println("== 3) DAOException capturada: " + e.getMessage());
         }
 
         System.out.println("OK");
     }
 
     /**
-     * Subclasse INTERNA de BaseDAO usada so para provocar uma violacao de
+     * Subclasse INTERNA de BaseDAO usada para provocar uma violacao de
      * UNIQUE no CPF e conferir a mensagem de inserirRetornandoId().
      */
     private static class DoadorCpfTesteDAO extends BaseDAO<String> {

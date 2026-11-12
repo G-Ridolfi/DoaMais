@@ -25,9 +25,7 @@ public class MotorAptidao {
 
     /** Cria o motor com as 3 regras padrao. */
     public MotorAptidao() {
-        // TODO(Guilherme): this(List.of(new RegraIdade(), new RegraPeso(), new RegraIntervalo()));
-        //   (apague o corpo abaixo ao implementar)
-        this.regras = new ArrayList<>();
+        this(List.of(new RegraIdade(), new RegraPeso(), new RegraIntervalo()));
     }
 
     /** Cria o motor com regras especificas (util para testes). */
@@ -42,8 +40,26 @@ public class MotorAptidao {
      * (null se nenhuma regra informar data).
      */
     public ResultadoAptidao avaliar(Doador doador, LocalDate hoje) {
-        // TODO(Guilherme)
-        throw new UnsupportedOperationException("TODO(Guilherme): MotorAptidao.avaliar");
+        List<String> motivos = new ArrayList<>();
+        LocalDate dataMaisDistante = null;
+
+        for (RegraAptidao regra : regras) {
+            // POLIMORFISMO: a mesma chamada regra.avaliar(doador, hoje) executa a implementacao
+            // concreta (RegraIdade, RegraPeso ou RegraIntervalo) sem que o motor saiba qual e.
+            ResultadoAptidao r = regra.avaliar(doador, hoje);
+            if (!r.isApto()) {
+                motivos.addAll(r.getMotivos());
+                LocalDate dataRegra = r.getDataLiberacao();
+                if (dataRegra != null && (dataMaisDistante == null || dataRegra.isAfter(dataMaisDistante))) {
+                    dataMaisDistante = dataRegra;
+                }
+            }
+        }
+
+        if (motivos.isEmpty()) {
+            return ResultadoAptidao.apto();
+        }
+        return new ResultadoAptidao(false, motivos, dataMaisDistante);
     }
 
     /** Avalia com a data de hoje. */
@@ -57,9 +73,10 @@ public class MotorAptidao {
      * @throws DoadorInaptoException se o doador estiver inapto hoje
      */
     public void verificarOuLancar(Doador doador) throws DoadorInaptoException {
-        // TODO(Guilherme): ResultadoAptidao r = avaliar(doador);
-        //   if (!r.isApto()) throw new DoadorInaptoException(r.getMotivos(), r.getDataLiberacao());
-        throw new UnsupportedOperationException("TODO(Guilherme): MotorAptidao.verificarOuLancar");
+        ResultadoAptidao r = avaliar(doador);
+        if (!r.isApto()) {
+            throw new DoadorInaptoException(r.getMotivos(), r.getDataLiberacao());
+        }
     }
 
     /** @return copia da lista de regras (para exibir/testar) */

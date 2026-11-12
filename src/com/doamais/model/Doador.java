@@ -3,6 +3,7 @@ package com.doamais.model;
 import com.doamais.exception.ValidacaoException;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * Voluntario doador de sangue. HERANCA: estende Pessoa.
@@ -47,8 +48,11 @@ public class Doador extends Pessoa {
      * Usado pela RegraIdade do Guilherme.
      */
     public int getIdade(LocalDate referencia) {
-        // TODO(Pedro): calcular com Period.between(dataNascimento, referencia).getYears()
-        throw new UnsupportedOperationException("TODO(Pedro): Doador.getIdade");
+        if (dataNascimento == null) {
+            return 0;
+        }
+        LocalDate ref = (referencia != null) ? referencia : LocalDate.now();
+        return Period.between(dataNascimento, ref).getYears();
     }
 
     /** Idade completa em anos hoje. */
@@ -59,8 +63,8 @@ public class Doador extends Pessoa {
     /** Ex: "João Silva, 32 anos – O+" */
     @Override
     public String getDescricao() {
-        // TODO(Pedro): montar descricao com nome, idade e tipo sanguineo
-        throw new UnsupportedOperationException("TODO(Pedro): Doador.getDescricao");
+        String tipo = (tipoSanguineo != null) ? tipoSanguineo.getRotulo() : "";
+        return nome + ", " + getIdade() + " anos \u2013 " + tipo;
     }
 
     /**
@@ -70,8 +74,45 @@ public class Doador extends Pessoa {
      */
     @Override
     public void validar() throws ValidacaoException {
-        // TODO(Pedro): implementar as regras descritas no Javadoc
-        throw new UnsupportedOperationException("TODO(Pedro): Doador.validar");
+        // 1. Dados basicos herdados de Pessoa (nome e tipo sanguineo obrigatorios)
+        validarDadosBasicos();
+
+        // 2. CPF: remove nao digitos, armazena no atributo e exige exatamente 11 digitos
+        if (cpf == null) {
+            throw new ValidacaoException("O CPF é obrigatório.");
+        }
+        this.cpf = cpf.replaceAll("\\D", "");
+        if (this.cpf.length() != 11) {
+            throw new ValidacaoException("O CPF deve conter exatamente 11 dígitos.");
+        }
+
+        // 3. Data de nascimento obrigatoria e antes de hoje
+        if (dataNascimento == null) {
+            throw new ValidacaoException("A data de nascimento é obrigatória.");
+        }
+        if (!dataNascimento.isBefore(LocalDate.now())) {
+            throw new ValidacaoException("A data de nascimento deve ser anterior a hoje.");
+        }
+
+        // 4. Sexo obrigatorio
+        if (sexo == null) {
+            throw new ValidacaoException("O sexo é obrigatório.");
+        }
+
+        // 5. Peso > 0 e < 300 kg
+        if (peso <= 0 || peso >= 300) {
+            throw new ValidacaoException("O peso deve ser maior que 0 e menor que 300 kg.");
+        }
+
+        // 6. Data da ultima doacao, se informada, nao pode ser futura nem anterior ao nascimento
+        if (dataUltimaDoacao != null) {
+            if (dataUltimaDoacao.isAfter(LocalDate.now())) {
+                throw new ValidacaoException("A data da última doação não pode ser futura.");
+            }
+            if (dataUltimaDoacao.isBefore(dataNascimento)) {
+                throw new ValidacaoException("A data da última doação não pode ser anterior à data de nascimento.");
+            }
+        }
     }
 
     public String getCpf() {

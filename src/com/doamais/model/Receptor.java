@@ -15,7 +15,6 @@ import java.time.LocalDate;
  *
  * Responsavel: Ricardo.
  * CONTRATO: usado por Amon (doacoes) e Maria Vitoria (feed da home).
- * Os metodos marcados com TODO(Ricardo) devem ser implementados pelo Ricardo.
  */
 public class Receptor extends Pessoa {
 
@@ -48,14 +47,13 @@ public class Receptor extends Pessoa {
 
     /** @return percentual de 0.0 a 100.0 (nunca passa de 100) */
     public double getProgresso() {
-        // TODO(Ricardo): doacoesRecebidas * 100.0 / metaDoacoes, limitado a 100
-        throw new UnsupportedOperationException("TODO(Ricardo): Receptor.getProgresso");
+        if (metaDoacoes <= 0) return 0;
+        return Math.min(100.0, doacoesRecebidas * 100.0 / metaDoacoes);
     }
 
     /** @return quantas bolsas ainda faltam (nunca negativo) */
     public int getFaltam() {
-        // TODO(Ricardo)
-        throw new UnsupportedOperationException("TODO(Ricardo): Receptor.getFaltam");
+        return Math.max(0, metaDoacoes - doacoesRecebidas);
     }
 
     /** @return true se status == CONCLUIDA */
@@ -66,25 +64,48 @@ public class Receptor extends Pessoa {
     /**
      * Soma 1 doacao recebida. Ao atingir a meta, muda o status para CONCLUIDA.
      *
+     * ENCAPSULAMENTO: unica forma de alterar doacoesRecebidas e status.
+     * A regra da meta fica protegida aqui — nao existe setter para esses campos.
+     *
      * @throws ValidacaoException se a campanha ja estiver concluida
      */
     public void registrarDoacao() throws ValidacaoException {
-        // TODO(Ricardo): implementar a regra descrita no Javadoc
-        throw new UnsupportedOperationException("TODO(Ricardo): Receptor.registrarDoacao");
+        if (isConcluida()) {
+            throw new ValidacaoException("A campanha de " + nome + " já atingiu a meta.");
+        }
+        doacoesRecebidas++;
+        if (doacoesRecebidas >= metaDoacoes) {
+            status = StatusCampanha.CONCLUIDA;
+        }
     }
 
-    /** Ex: "Maria Clara – Hospital Estadual Infantil – precisa de O-" */
+    /**
+     * POLIMORFISMO: cada subclasse de Pessoa retorna sua propria descricao.
+     * Ex: "Maria Clara – Hospital Estadual Infantil – precisa de O+"
+     */
     @Override
     public String getDescricao() {
-        // TODO(Ricardo)
-        throw new UnsupportedOperationException("TODO(Ricardo): Receptor.getDescricao");
+        String tipo = (tipoSanguineo != null) ? tipoSanguineo.getRotulo() : "";
+        return nome + " – " + hospital + " – precisa de " + tipo;
     }
 
-    /** Regras: validarDadosBasicos(); hospital obrigatorio; metaDoacoes > 0. */
+    /**
+     * Valida os dados da campanha antes de salvar.
+     * Regras: nome e tipo obrigatorios (herdado), hospital obrigatorio,
+     * metaDoacoes entre 1 e 50, doacoesRecebidas entre 0 e a meta.
+     */
     @Override
     public void validar() throws ValidacaoException {
-        // TODO(Ricardo)
-        throw new UnsupportedOperationException("TODO(Ricardo): Receptor.validar");
+        validarDadosBasicos();
+        if (hospital == null || hospital.isBlank()) {
+            throw new ValidacaoException("O hospital é obrigatório.");
+        }
+        if (metaDoacoes < 1 || metaDoacoes > 50) {
+            throw new ValidacaoException("A meta de doações deve ser entre 1 e 50.");
+        }
+        if (doacoesRecebidas < 0 || doacoesRecebidas > metaDoacoes) {
+            throw new ValidacaoException("As doações recebidas devem ser entre 0 e a meta.");
+        }
     }
 
     public String getHospital() {

@@ -5,13 +5,15 @@ import java.time.LocalDate;
 /**
  * Registro de uma doacao realizada por um doador.
  *
- * ASSOCIACAO: uma Doacao TEM um Doador e (opcionalmente) um Receptor.
- * Se receptor for null, a doacao foi para o estoque geral de reposicao.
+ * ASSOCIACAO: uma Doacao TEM UM Doador (obrigatorio) e PODE TER UM Receptor
+ * (opcional). Os dois sao guardados como OBJETOS, e nao apenas como ids, entao
+ * e possivel navegar: doacao.getDoador().getNome() ou
+ * doacao.getReceptor().getNome(). Se receptor for null, a doacao foi para o
+ * estoque geral de reposicao do HEMOES.
  *
  * Tabela no banco: doacoes.
  *
  * Responsavel: Amon.
- * Os metodos marcados com TODO(Amon) devem ser implementados pelo Amon.
  */
 public class Doacao {
 
@@ -32,10 +34,14 @@ public class Doacao {
         this.local = local;
     }
 
-    /** @return true se a doacao foi direcionada a uma campanha (receptor != null) */
+    /**
+     * Indica se a doacao foi direcionada a uma campanha especifica.
+     *
+     * @return true se a doacao foi direcionada a uma campanha (receptor != null);
+     *         false se foi para o estoque geral
+     */
     public boolean isDirecionada() {
-        // TODO(Amon)
-        throw new UnsupportedOperationException("TODO(Amon): Doacao.isDirecionada");
+        return receptor != null;
     }
 
     public int getId() {

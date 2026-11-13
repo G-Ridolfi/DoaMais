@@ -1,7 +1,13 @@
 package com.doamais.service;
 
+import com.doamais.dao.DoacaoDAO;
+import com.doamais.dao.DoadorDAO;
+import com.doamais.dao.ReceptorDAO;
 import com.doamais.exception.DoaMaisException;
+import com.doamais.exception.ValidacaoException;
 import com.doamais.model.Doacao;
+import com.doamais.model.Doador;
+import com.doamais.model.Receptor;
 
 import java.time.LocalDate;
 
@@ -27,11 +33,17 @@ import java.time.LocalDate;
  */
 public class DoacaoService {
 
-    // TODO(Amon): atributos privados DoadorDAO, ReceptorDAO, DoacaoDAO e MotorAptidao,
-    //   criados no construtor
+    // COMPOSICAO: o service "tem" os DAOs e o motor, criados no construtor
+    private final DoadorDAO doadorDAO;
+    private final ReceptorDAO receptorDAO;
+    private final DoacaoDAO doacaoDAO;
+    private final MotorAptidao motor;
 
     public DoacaoService() {
-        // TODO(Amon): instanciar os DAOs e o motor
+        this.doadorDAO = new DoadorDAO();
+        this.receptorDAO = new ReceptorDAO();
+        this.doacaoDAO = new DoacaoDAO();
+        this.motor = new MotorAptidao();
     }
 
     /**
@@ -43,7 +55,49 @@ public class DoacaoService {
      */
     public Doacao registrar(int doadorId, Integer receptorId, LocalDate data, String local)
             throws DoaMaisException {
-        // TODO(Amon): implementar os passos descritos no Javadoc da classe
-        throw new UnsupportedOperationException("TODO(Amon): DoacaoService.registrar");
+        // Validacao simples da data antes de mexer no banco
+        if (data == null) {
+            throw new ValidacaoException("A data da doação é obrigatória.");
+        }
+        if (data.isAfter(LocalDate.now())) {
+            throw new ValidacaoException("A data da doação não pode estar no futuro.");
+        }
+
+        // PROPAGACAO DE EXCECOES: nenhum try/catch neste metodo. Qualquer
+        // ValidacaoException, DAOException ou DoadorInaptoException "sobe" pela
+        // clausula throws ate o BaseHandler, que a transforma em alerta na tela.
+
+        // 1. buscar o doador
+        Doador doador = doadorDAO.buscarPorId(doadorId)
+                .orElseThrow(() -> new ValidacaoException("Doador não encontrado"));
+
+        // 2. se for direcionada, buscar a campanha
+        Receptor receptor = null; // null = estoque geral
+        if (receptorId != null) {
+            receptor = receptorDAO.buscarPorId(receptorId)
+                    .orElseThrow(() -> new ValidacaoException("Campanha não encontrada"));
+        }
+
+        // 3. regras de aptidao (pode lancar DoadorInaptoException)
+        motor.verificarOuLancar(doador);
+
+        // 4. soma 1 na campanha (ENCAPSULAMENTO: so o Receptor altera o proprio progresso)
+        if (receptor != null) {
+            receptor.registrarDoacao();
+        }
+
+        // 5. salvar a doacao (ASSOCIACAO: a Doacao guarda os objetos Doador e Receptor)
+        Doacao doacao = new Doacao(0, doador, receptor, data, local);
+        doacaoDAO.inserir(doacao);
+
+        // 6. a ultima doacao do doador passa a ser esta data
+        doadorDAO.atualizarUltimaDoacao(doadorId, data);
+
+        // 7. grava o novo progresso da campanha
+        if (receptor != null) {
+            receptorDAO.atualizarProgresso(receptor);
+        }
+
+        return doacao;
     }
 }

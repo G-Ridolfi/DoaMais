@@ -146,7 +146,16 @@ public final class FormUtil {
             return null;
         }
         try {
-            return LocalDate.parse(valor);
+            LocalDate data = LocalDate.parse(valor);
+            if (data.getYear() < 1900 || data.getYear() > 2100) {
+                throw new ValidacaoException("O campo '" + nomeAmigavel(campo)
+                        + "' possui um ano inválido (" + data.getYear() + "). Informe uma data real.");
+            }
+            if (data.isAfter(LocalDate.now())) {
+                throw new ValidacaoException("O campo '" + nomeAmigavel(campo)
+                        + "' não pode ser uma data futura.");
+            }
+            return data;
         } catch (DateTimeParseException e) {
             throw new ValidacaoException("O campo '" + nomeAmigavel(campo)
                     + "' deve ser uma data válida (dd/mm/aaaa).", e);

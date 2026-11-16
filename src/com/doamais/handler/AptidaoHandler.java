@@ -70,6 +70,18 @@ public class AptidaoHandler extends BaseHandler {
         double peso = FormUtil.getDouble(form, "peso");
         LocalDate dataUltimaDoacao = FormUtil.getData(form, "dataUltimaDoacao", false);
 
+        if (peso <= 0 || peso >= 300) {
+            throw new ValidacaoException("O peso deve ser maior que 0 e menor que 300 kg.");
+        }
+        if (dataUltimaDoacao != null) {
+            if (dataUltimaDoacao.isBefore(dataNascimento)) {
+                throw new ValidacaoException("A data da última doação não pode ser anterior à data de nascimento.");
+            }
+            if (dataUltimaDoacao.isBefore(dataNascimento.plusYears(18))) {
+                throw new ValidacaoException("A data da última doação é inválida (anterior aos 18 anos de idade).");
+            }
+        }
+
         Doador doador = new Doador();
         doador.setNome("Visitante");
         doador.setTipoSanguineo(TipoSanguineo.O_POS);

@@ -72,8 +72,35 @@
         if (campo.name === "metaDoacoes" && !(parseInt(valor, 10) > 0)) {
             return "A meta deve ser maior que zero.";
         }
-        if (campo.type === "date" && campo.max && valor > campo.max) {
-            return "A data não pode estar no futuro.";
+        if (campo.type === "date") {
+            if (valor < "1900-01-01") {
+                return "Informe uma data válida (a partir de 1900).";
+            }
+            if (campo.max && valor > campo.max) {
+                return "A data não pode estar no futuro.";
+            }
+        }
+        if (campo.name === "dataNascimento" && window.location.pathname.indexOf("/doadores") === 0) {
+            var nasc = lerData(valor);
+            var hojeData = lerData(hojeIso());
+            if (nasc && hojeData) {
+                var id = idadeEmAnos(nasc, hojeData);
+                if (id < 18) return "O doador deve ter pelo menos 18 anos para se cadastrar.";
+                if (id > 69) return "A idade máxima para cadastro de doador é 69 anos.";
+            }
+        }
+        if (campo.name === "dataUltimaDoacao" && campo.form) {
+            var campoNasc = campo.form.elements.namedItem("dataNascimento");
+            var nascDoador = campoNasc ? lerData(campoNasc.value) : null;
+            var ultimaDoacao = lerData(valor);
+            if (nascDoador && ultimaDoacao) {
+                if (ultimaDoacao < nascDoador) {
+                    return "A última doação não pode ser anterior à data de nascimento.";
+                }
+                if (idadeEmAnos(nascDoador, ultimaDoacao) < 18) {
+                    return "Data da última doação inválida (anterior aos 18 anos de idade).";
+                }
+            }
         }
         return "";
     }
@@ -82,8 +109,9 @@
     function prepararValidacao() {
         var hoje = hojeIso();
 
-        // Impede datas futuras: max = hoje em todo input de data
+        // Impede datas futuras e anos malucos (ex: 1111): min = 1900-01-01, max = hoje
         document.querySelectorAll('input[type="date"]').forEach(function (campo) {
+            if (!campo.min) campo.min = "1900-01-01";
             if (!campo.max) campo.max = hoje;
         });
 

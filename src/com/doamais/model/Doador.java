@@ -86,12 +86,19 @@ public class Doador extends Pessoa {
             throw new ValidacaoException("O CPF deve conter exatamente 11 dígitos.");
         }
 
-        // 3. Data de nascimento obrigatoria e antes de hoje
+        // 3. Data de nascimento obrigatoria, ano valido e faixa etaria permitida (18 a 69 anos)
         if (dataNascimento == null) {
             throw new ValidacaoException("A data de nascimento é obrigatória.");
         }
-        if (!dataNascimento.isBefore(LocalDate.now())) {
-            throw new ValidacaoException("A data de nascimento deve ser anterior a hoje.");
+        if (dataNascimento.getYear() < 1900 || !dataNascimento.isBefore(LocalDate.now())) {
+            throw new ValidacaoException("Informe uma data de nascimento válida e anterior a hoje.");
+        }
+        int idade = getIdade();
+        if (idade < 18) {
+            throw new ValidacaoException("Não é permitido cadastrar doadores menores de 18 anos (idade calculada: " + idade + " anos).");
+        }
+        if (idade > 69) {
+            throw new ValidacaoException("A idade máxima permitida para cadastro de doador é 69 anos (idade calculada: " + idade + " anos).");
         }
 
         // 4. Sexo obrigatorio
@@ -104,13 +111,19 @@ public class Doador extends Pessoa {
             throw new ValidacaoException("O peso deve ser maior que 0 e menor que 300 kg.");
         }
 
-        // 6. Data da ultima doacao, se informada, nao pode ser futura nem anterior ao nascimento
+        // 6. Data da ultima doacao, se informada, nao pode ser futura, anterior a 1900 nem anterior aos 18 anos do doador
         if (dataUltimaDoacao != null) {
+            if (dataUltimaDoacao.getYear() < 1900) {
+                throw new ValidacaoException("A data da última doação possui um ano inválido.");
+            }
             if (dataUltimaDoacao.isAfter(LocalDate.now())) {
                 throw new ValidacaoException("A data da última doação não pode ser futura.");
             }
             if (dataUltimaDoacao.isBefore(dataNascimento)) {
                 throw new ValidacaoException("A data da última doação não pode ser anterior à data de nascimento.");
+            }
+            if (dataUltimaDoacao.isBefore(dataNascimento.plusYears(18))) {
+                throw new ValidacaoException("A data da última doação é inválida (anterior aos 18 anos do doador).");
             }
         }
     }

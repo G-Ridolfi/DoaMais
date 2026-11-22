@@ -1,14 +1,7 @@
 package com.doamais.exception;
 
 /**
- * Dado invalido informado pelo usuario ou recebido de outra camada
- * (ex: nome vazio, peso negativo, tipo sanguineo inexistente, CPF repetido,
- * campo de formulario mal preenchido).
- *
- * Lancada pelos metodos validar() dos modelos, pelos enums ao converter
- * textos e pelo FormUtil ao converter campos de formulario.
- *
- * Responsavel: Gabriel.
+ * HERANCA: erro de validacao de dados (estende DoaMaisException).
  */
 public class ValidacaoException extends DoaMaisException {
 

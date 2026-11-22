@@ -7,7 +7,6 @@ Projeto integrado das disciplinas **Projeto Integrador II** e **Linguagem de Pro
 
 ---
 
-
 ## ▶️ Como rodar
 
 ```
@@ -18,8 +17,6 @@ build.bat com.doamais.teste.DatabaseTeste  # roda uma classe de teste
 ```
 
 O banco `database/doamais.db` é criado automaticamente (não vai para o Git). Para recomeçar do zero, apague esse arquivo.
-
-> Enquanto houver partes pendentes, as telas correspondentes dão erro (`UnsupportedOperationException: TODO(<Nome>)`). Isso é esperado.
 
 ---
 
@@ -35,9 +32,8 @@ src/com/doamais/
   service/         RegraAptidao (interface), regras, MotorAptidao, DoacaoService
   handler/         BaseHandler (abstrata) e telas
   util/            FormUtil, HtmlUtil
-  teste/           classes de teste (uma por integrante)
+  teste/           classes de teste
 web/               style.css, app.js
-docs/              CONTRATOS.md e tarefas/
 lib/               driver SQLite JDBC
 ```
 
@@ -53,11 +49,3 @@ lib/               driver SQLite JDBC
 | **Coleções** | `List` nos DAOs · `EnumMap` no termômetro · `Map` nas estatísticas e no `FormUtil` |
 | **Leitura e gravação** | Banco de dados relacional SQLite via JDBC (`Database`, `BaseDAO<T>`) |
 | **Interface gráfica** | Páginas web (HTML/CSS/JS) servidas pelo próprio Java |
-
----
-
-## 🔀 Regras de Git
-
-- Nunca commitar direto na `main`; cada um trabalha na sua branch (`feat/<nome>-<modulo>`) e abre Pull Request.
-- Antes de começar: `git checkout main && git pull`.
-- Cada um edita **só os próprios arquivos** (ver `docs/CONTRATOS.md` §1).

@@ -7,35 +7,6 @@ Projeto integrado das disciplinas **Projeto Integrador II** e **Linguagem de Pro
 
 ---
 
-## 🚀 Como cada integrante trabalha
-
-1. **Uma vez só:** aceite o convite de colaborador no GitHub, instale **Git** e **JDK 17+**, e clone:
-   ```
-   git clone https://github.com/G-Ridolfi/DoaMais.git
-   ```
-2. Abra a pasta `DoaMais` como workspace no Antigravity.
-3. Peça no chat:
-   > **Faça a tarefa do &lt;seu nome&gt;.**
-
-   Para mais garantia, use o **prompt pronto** do seu nome em [`docs/PROMPTS.md`](docs/PROMPTS.md). Lá também há prompts para atualizar sua parte depois que os colegas subirem e para estudar para a apresentação.
-
-O Antigravity lê as regras em [`.agent/rules/padrao-do-grupo.md`](.agent/rules/padrao-do-grupo.md) e segue o roteiro: atualiza a `main`, cria sua branch, lê **sua tarefa** em [`docs/tarefas/`](docs/tarefas/), implementa só os `TODO(<seu nome>)`, compila, testa, faz commit e push, e te devolve o link do Pull Request.
-
-4. Abra o **Pull Request** pelo link, revise e faça o merge na `main`. Avise o grupo.
-5. **Leia o resumo** que o Antigravity der e o arquivo da sua tarefa. Na apresentação **cada um explica a própria parte** (a nota é individual).
-
-| Integrante | Tarefa | Módulo |
-|---|---|---|
-| Gabriel Ridolfi Pupim | [gabriel.md](docs/tarefas/gabriel.md) | Dados, persistência (SQLite) e exceções |
-| Pedro Paulo Rodrigues da Silva | [pedro.md](docs/tarefas/pedro.md) | Doadores |
-| Guilherme Caiado Richa | [guilherme.md](docs/tarefas/guilherme.md) | Motor de regras de aptidão |
-| Ricardo Irineu Sales Machado | [ricardo.md](docs/tarefas/ricardo.md) | Campanhas e receptores |
-| Amon Butk Rangel Alves | [amon.md](docs/tarefas/amon.md) | Doações, vínculo e estoque |
-| Maria Vitória Poubel de Paula Pires | [maria-vitoria.md](docs/tarefas/maria-vitoria.md) | Frontend, servidor e integração |
-
-> **Ordem sugerida:** Gabriel e Maria Vitória primeiro (base dos DAOs e das telas), depois Pedro, Ricardo e Guilherme, e por último Amon (integra tudo). O código **compila desde já**, então todos podem trabalhar em paralelo. Veja [`docs/CONTRATOS.md`](docs/CONTRATOS.md) §6.
-
----
 
 ## ▶️ Como rodar
 

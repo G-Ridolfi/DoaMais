@@ -11,32 +11,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Teste manual da camada de persistencia (Database + BaseDAO + DAOException).
- *
- * Nao depende dos DAOs dos colegas: usa uma subclasse ANONIMA de BaseDAO
- * para provar a HERANCA e o POLIMORFISMO (listarTodos() herdado chamando o
- * mapear() definido aqui).
- *
- * Rodar: build.bat com.doamais.teste.PersistenciaTeste
- * (apague database/doamais.db antes para testar a carga inicial do zero).
- *
- * Responsavel: Gabriel.
+ * Teste da camada de persistencia (Database + BaseDAO + DAOException).
  */
 public class PersistenciaTeste {
 
     public static void main(String[] args) throws DoaMaisException {
-        // 1) Cria as tabelas e popula os dados iniciais da demonstracao se o banco estiver vazio
+        // 1) Inicializa o banco SQLite e carrega o seed se estiver vazio
         Database.inicializar();
         System.out.println("== 1) Banco SQLite inicializado com sucesso");
 
-        // 2) HERANCA: subclasse anonima de BaseDAO<String> para a tabela receptores
+        // 2) HERANCA + POLIMORFISMO: subclasse anonima de BaseDAO<String>
         BaseDAO<String> receptores = new BaseDAO<String>() {
             @Override
             protected String getTabela() {
                 return "receptores";
             }
 
-            // POLIMORFISMO: listarTodos()/buscarPorId() da BaseDAO chamam ESTE mapear()
+            // POLIMORFISMO: listarTodos() e buscarPorId() da BaseDAO chamam este mapear()
             @Override
             protected String mapear(ResultSet rs) throws SQLException {
                 return rs.getInt("id") + " - " + rs.getString("nome_paciente")
@@ -63,9 +54,9 @@ public class PersistenciaTeste {
         System.out.println("   buscarPorId(1)    = " + primeiro.orElse("(nao encontrado)"));
         System.out.println("   buscarPorId(9999) = " + receptores.buscarPorId(9999).orElse("(nao encontrado)"));
 
-        // 3) TRATAMENTO DE EXCECAO: CPF repetido vira DAOException amigavel
+        // 3) TRATAMENTO DE EXCECAO: CPF repetido (UNIQUE) vira DAOException amigavel
         try {
-            new DoadorCpfTesteDAO().inserir("12345678901"); // CPF do Carlos Andrade
+            new DoadorCpfTesteDAO().inserir("12345678901");
             System.out.println("== 3) ERRO: deveria ter lancado DAOException");
         } catch (DAOException e) {
             System.out.println("== 3) DAOException capturada: " + e.getMessage());
@@ -74,10 +65,7 @@ public class PersistenciaTeste {
         System.out.println("OK");
     }
 
-    /**
-     * Subclasse INTERNA de BaseDAO usada para provocar uma violacao de
-     * UNIQUE no CPF e conferir a mensagem de inserirRetornandoId().
-     */
+    /** Subclasse interna de BaseDAO para testar violacao de UNIQUE no CPF. */
     private static class DoadorCpfTesteDAO extends BaseDAO<String> {
 
         @Override
@@ -90,7 +78,6 @@ public class PersistenciaTeste {
             return rs.getString("nome");
         }
 
-        /** Tenta inserir um doador ficticio com o CPF informado. */
         @Override
         public void inserir(String cpf) throws DAOException {
             inserirRetornandoId("INSERT INTO doadores (nome, cpf, data_nascimento, sexo, peso, "

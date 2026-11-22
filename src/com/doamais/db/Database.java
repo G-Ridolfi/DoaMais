@@ -8,22 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Infraestrutura de banco de dados do DoaMais.
- *
- * Gerencia o ciclo de vida da conexao JDBC com o SQLite (arquivo local
- * database/doamais.db), cria automaticamente as tabelas no primeiro boot e
- * popula os dados iniciais da demonstracao quando o banco estiver vazio.
- *
- * Uso nos DAOs:
- * <pre>
- *   try (Connection c = Database.getConnection();
- *        PreparedStatement ps = c.prepareStatement("SELECT ...")) { ... }
- * </pre>
- * Cada chamada a getConnection() devolve uma conexao nova, que deve ser
- * fechada pelo chamador (try-with-resources). Isso evita problemas de
- * concorrencia, ja que o HttpServer atende requisicoes em varias threads.
- *
- * Responsavel: Gabriel.
+ * LEITURA E GRAVACAO (JDBC / SQLite): gerencia a conexao com database/doamais.db,
+ * cria as tabelas no boot e popula os dados iniciais da demonstracao.
  */
 public final class Database {
 
@@ -32,13 +18,9 @@ public final class Database {
     private static final String URL = "jdbc:sqlite:" + DB_DIR + "/" + DB_FILE;
 
     private Database() {
-        // classe utilitaria: nao instanciavel
     }
 
-    /**
-     * Abre uma nova conexao com o SQLite, com chaves estrangeiras habilitadas
-     * (o SQLite as desabilita por padrao a cada conexao).
-     */
+    /** Abre nova conexao SQLite ativando chaves estrangeiras (desligadas por padrao no SQLite). */
     public static Connection getConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
         try (Statement st = conn.createStatement()) {
@@ -48,12 +30,7 @@ public final class Database {
         return conn;
     }
 
-    /**
-     * Cria a pasta do banco, todas as tabelas e os dados iniciais da
-     * demonstracao, se ainda nao existirem.
-     * Deve ser chamado uma unica vez na inicializacao (Main.java).
-     * E idempotente: pode ser chamado varias vezes sem perder dados.
-     */
+    /** Idempotente: cria a pasta, as 4 tabelas e carrega o seed se o banco estiver vazio. */
     public static void inicializar() {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -75,14 +52,14 @@ public final class Database {
                     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome               TEXT    NOT NULL,
                     cpf                TEXT    NOT NULL UNIQUE,
-                    data_nascimento    TEXT    NOT NULL,            -- ISO yyyy-MM-dd
+                    data_nascimento    TEXT    NOT NULL,
                     sexo               TEXT    NOT NULL CHECK (sexo IN ('M','F')),
                     peso               REAL    NOT NULL CHECK (peso > 0),
                     tipo_sanguineo     TEXT    NOT NULL CHECK (tipo_sanguineo IN
                                            ('A+','A-','B+','B-','AB+','AB-','O+','O-')),
                     telefone           TEXT,
                     email              TEXT,
-                    data_ultima_doacao TEXT                         -- ISO yyyy-MM-dd, pode ser nula
+                    data_ultima_doacao TEXT
                 )""");
 
             st.execute("""
@@ -104,14 +81,13 @@ public final class Database {
                 CREATE TABLE IF NOT EXISTS doacoes (
                     id          INTEGER PRIMARY KEY AUTOINCREMENT,
                     doador_id   INTEGER NOT NULL,
-                    receptor_id INTEGER,                            -- nulo = estoque geral de reposicao
-                    data_doacao TEXT    NOT NULL,                   -- ISO yyyy-MM-dd
+                    receptor_id INTEGER,
+                    data_doacao TEXT    NOT NULL,
                     local       TEXT,
                     FOREIGN KEY (doador_id)   REFERENCES doadores(id)   ON DELETE CASCADE,
                     FOREIGN KEY (receptor_id) REFERENCES receptores(id) ON DELETE SET NULL
                 )""");
 
-            // Quarta tabela: termometro do HEMOES (leitura com fallback em banco local)
             st.execute("""
                 CREATE TABLE IF NOT EXISTS estoque_hemoes (
                     tipo_sanguineo TEXT PRIMARY KEY CHECK (tipo_sanguineo IN
@@ -123,7 +99,7 @@ public final class Database {
             st.execute("CREATE INDEX IF NOT EXISTS idx_doacoes_doador   ON doacoes(doador_id)");
             st.execute("CREATE INDEX IF NOT EXISTS idx_doacoes_receptor ON doacoes(receptor_id)");
 
-            // Valores iniciais do termometro (so insere se a linha ainda nao existir)
+            // Termometro inicial do HEMOES (O- e B- em nivel CRITICO)
             st.execute("""
                 INSERT OR IGNORE INTO estoque_hemoes (tipo_sanguineo, nivel) VALUES
                     ('A+','NORMAL'),('A-','BAIXO'),('B+','NORMAL'),('B-','CRITICO'),
@@ -136,10 +112,7 @@ public final class Database {
         }
     }
 
-    /**
-     * Popula o banco com os dados iniciais da demonstracao (doadores,
-     * campanhas e doacoes) apenas se a tabela doadores estiver vazia.
-     */
+    /** Seed da demonstracao: so insere se a tabela doadores estiver vazia (COUNT = 0). */
     private static void carregarDadosIniciais(Statement st) throws SQLException {
         try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM doadores")) {
             if (rs.next() && rs.getInt(1) > 0) {

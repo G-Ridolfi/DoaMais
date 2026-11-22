@@ -1,18 +1,8 @@
 package com.doamais.exception;
 
 /**
- * Erro de persistencia no banco de dados SQLite.
- *
- * Regra do projeto: os DAOs NUNCA deixam uma SQLException "vazar" para as
- * outras camadas. Ela e capturada e convertida em DAOException, mantendo a
- * original como causa:
- * <pre>
- *   } catch (SQLException e) {
- *       throw new DAOException("Erro ao salvar doador", e);
- *   }
- * </pre>
- *
- * Responsavel: Gabriel.
+ * HERANCA: erro de persistencia (estende DoaMaisException).
+ * Isola o JDBC: os DAOs convertem SQLException em DAOException mantendo a causa original.
  */
 public class DAOException extends DoaMaisException {
 

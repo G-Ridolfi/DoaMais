@@ -58,6 +58,7 @@
     }
 
     /** Regras de cada campo; devolve a mensagem de erro ou "". */
+    /* #30 Validacao imediata no navegador (o Java valida tudo de novo no servidor) */
     function validarCampo(campo) {
         var valor = (campo.value || "").trim();
         if (campo.required && !valor) return "Campo obrigatório.";
@@ -147,6 +148,7 @@
      * 2) Previa de aptidao (mesmas regras do MotorAptidao):
      *    18 a 69 anos, peso >= 50 kg, intervalo 60 dias (homem) / 90 dias (mulher).
      */
+    /* #31 Previa instantanea na pre-triagem sem recarregar a pagina */
     function prepararPreviaAptidao() {
         if (window.location.pathname.indexOf("/aptidao") !== 0) return;
         var form = document.querySelector("form");
@@ -212,6 +214,7 @@
     }
 
     /** 3) Confirmacao antes de enviar o formulario de doacao. */
+    /* #32 Pede confirmacao antes de registrar uma doacao */
     function prepararConfirmacaoDoacao() {
         document.querySelectorAll("form").forEach(function (form) {
             var ehDoacao = (form.getAttribute("action") || window.location.pathname)

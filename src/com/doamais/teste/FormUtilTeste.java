@@ -19,6 +19,7 @@ public class FormUtilTeste {
 
     private static int falhas = 0;
 
+    // #33 Teste isolado do modulo: valida parse, ValidacaoException e escapar anti-XSS
     public static void main(String[] args) {
         System.out.println("=== FormUtilTeste ===\n");
 

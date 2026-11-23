@@ -39,7 +39,7 @@ public final class HtmlUtil {
         if (texto == null) {
             return "";
         }
-        // '&' PRIMEIRO, senao as entidades geradas depois seriam escapadas de novo
+        // #21 Seguranca (XSS): escapa simbolos HTML (& primeiro para nao duplicar), bloqueando <script>
         return texto.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
@@ -56,6 +56,7 @@ public final class HtmlUtil {
      * @param titulo       titulo da aba e do &lt;h1&gt; (sera escapado)
      * @param conteudoHtml HTML ja pronto do corpo (NAO e escapado)
      */
+    // #22 Interface grafica: estrutura HTML padrao (menu, rodape, CSS/JS) para todas as telas
     public static String pagina(String titulo, String conteudoHtml) {
         String t = escapar(titulo);
         StringBuilder html = new StringBuilder(2048);
@@ -108,6 +109,7 @@ public final class HtmlUtil {
      * "3 de 5 bolsas", barra de progresso, link "Ver campanha"
      * (/campanhas/ver?id=) e botao "Quero doar" (/doacoes/nova?receptorId=).
      */
+    // #23 Componentes reutilizaveis: cardCampanha (aqui) e badgeEstoque (linha 134)
     public static String cardCampanha(Receptor r) {
         String tipo = r.getTipoSanguineo() == null ? "" : r.getTipoSanguineo().getRotulo();
         return "<article class=\"card card-campanha\">\n"

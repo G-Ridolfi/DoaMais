@@ -4,6 +4,7 @@
    Responsavel: Maria Vitoria.
    ========================================================= */
 
+/* #28 Interface grafica (HTML/CSS/JS): identidade vinho e layout responsivo mobile first */
 :root {
     --vinho: #7a1020;
     --vinho-escuro: #5a0b17;
@@ -155,6 +156,7 @@ input[type="submit"]:hover { background: var(--vinho-escuro); border-color: var(
 
 .secao-termometro h2 { margin-top: 0; }
 
+/* #29 Termometro: 4 colunas no celular, 8 no PC (@media linha 351); .critico pulsa (linha 180) */
 .termometro {
     display: grid;
     grid-template-columns: repeat(4, 1fr);   /* 2 linhas de 4 no celular */

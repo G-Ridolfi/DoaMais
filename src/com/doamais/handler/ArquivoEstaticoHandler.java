@@ -24,12 +24,13 @@ import java.util.Map;
  *
  * Responsavel: Maria Vitoria.
  */
+// #24 Implementa HttpHandler direto (nao BaseHandler) por entregar apenas arquivos prontos
 public class ArquivoEstaticoHandler implements HttpHandler {
 
     /** Prefixo da rota registrada no Main. */
     private static final String PREFIXO = "/static/";
 
-    /** COLECAO (Map): extensao do arquivo -> Content-Type enviado ao navegador. */
+    // #25 Colecao (HashMap): extensao -> Content-Type (busca rapida sem depender de ordem)
     private static final Map<String, String> TIPOS = new HashMap<>();
 
     static {
@@ -52,6 +53,7 @@ public class ArquivoEstaticoHandler implements HttpHandler {
     public void handle(HttpExchange ex) throws IOException {
         try {
             String caminho = ex.getRequestURI().getPath();
+            // #26 Seguranca: bloqueia ".." e confirma startsWith para nao ler arquivos fora de web/
             if (!"GET".equalsIgnoreCase(ex.getRequestMethod())
                     || !caminho.startsWith(PREFIXO) || caminho.contains("..")) {
                 enviarNaoEncontrado(ex);
@@ -65,6 +67,7 @@ public class ArquivoEstaticoHandler implements HttpHandler {
                 return;
             }
 
+            // #27 Leitura de arquivo: carrega CSS e JS direto da pasta web/ no disco
             byte[] corpo = Files.readAllBytes(arquivo);
             ex.getResponseHeaders().set("Content-Type", tipoDoArquivo(arquivo));
             ex.sendResponseHeaders(200, corpo.length);

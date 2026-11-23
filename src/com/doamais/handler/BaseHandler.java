@@ -38,6 +38,7 @@ import java.util.Map;
  * Responsavel: Maria Vitoria.
  * CONTRATO: assinaturas usadas por todos. Nao alterar sem avisar o grupo.
  */
+// #4 Heranca: classe abstract usada como molde pai das 5 telas (evita codigo repetido)
 public abstract class BaseHandler implements HttpHandler {
 
     /** Botao "Voltar" usado nas paginas de erro (volta para o formulario preenchido). */
@@ -52,6 +53,7 @@ public abstract class BaseHandler implements HttpHandler {
      */
     @Override
     public void handle(HttpExchange ex) throws IOException {
+        // #5 Polimorfismo (Template Method): fluxo unico (GET -> get, POST -> post) chamando o @Override da tela filha
         try {
             String metodo = ex.getRequestMethod().toUpperCase();
             if ("GET".equals(metodo)) {
@@ -62,15 +64,13 @@ public abstract class BaseHandler implements HttpHandler {
                 enviarMetodoNaoPermitido(ex);
             }
         } catch (DoaMaisException e) {
-            // TRATAMENTO DE EXCECAO: ValidacaoException, DAOException e
-            // DoadorInaptoException herdam de DoaMaisException e viram um alerta.
+            // #6 Tratamento de excecao: erros esperados (validacao, banco, inapto) viram alerta HTTP 400 + Voltar
             if (respostaAindaNaoEnviada(ex)) {
                 enviarHtml(ex, 400, HtmlUtil.pagina("Atenção",
                         HtmlUtil.alerta("erro", e.getMessage()) + BOTAO_VOLTAR));
             }
         } catch (Exception e) {
-            // Erro inesperado (bug, TODO de colega, etc.): registra no console e
-            // responde 500. O servidor continua de pe para as proximas requisicoes.
+            // #7 Segura falhas inesperadas com HTTP 500 (servidor nunca cai); finally fecha o atendimento
             e.printStackTrace();
             if (respostaAindaNaoEnviada(ex)) {
                 enviarHtml(ex, 500, HtmlUtil.pagina("Ops! Algo deu errado.",
@@ -82,7 +82,7 @@ public abstract class BaseHandler implements HttpHandler {
         }
     }
 
-    /** Responde a um GET. Todo handler implementa. */
+    // #8 get() e abstract (toda tela abre uma pagina); post() abaixo devolve 405 para telas sem formulario
     protected abstract void get(HttpExchange ex) throws DoaMaisException, IOException;
 
     /**
@@ -100,6 +100,7 @@ public abstract class BaseHandler implements HttpHandler {
             throws IOException {
         ex.getResponseHeaders().set("Content-Type", contentType);
         ex.sendResponseHeaders(status, corpo.length);
+        // #9 Gravacao/recurso: try-with-resources escreve a resposta e fecha o fluxo automaticamente
         try (OutputStream saida = ex.getResponseBody()) {
             saida.write(corpo);
         }
@@ -110,7 +111,7 @@ public abstract class BaseHandler implements HttpHandler {
         enviarResposta(ex, status, "text/html; charset=UTF-8", html.getBytes(StandardCharsets.UTF_8));
     }
 
-    /** Envia uma pagina HTML com status 200. */
+    // #10 Polimorfismo (Sobrecarga): enviarHtml sem status usa 200 por padrao
     protected void enviarHtml(HttpExchange ex, String html) throws IOException {
         enviarHtml(ex, 200, html);
     }

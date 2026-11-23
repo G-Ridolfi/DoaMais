@@ -26,12 +26,14 @@ import java.util.Map;
  * Responsavel: Maria Vitoria.
  * CONTRATO: usado por todos os handlers. Nao alterar assinaturas sem avisar.
  */
+// #16 Classe utilitaria final (construtor private na linha 50): apenas metodos static, sem new
 public final class FormUtil {
 
     /**
      * COLECAO (Map): nome tecnico do campo -> nome amigavel usado nas
      * mensagens de erro. Campos fora do mapa aparecem com o proprio nome.
      */
+    // #17 Colecao (LinkedHashMap): traduz nomes tecnicos para texto legivel nas mensagens de erro
     private static final Map<String, String> NOMES_AMIGAVEIS = new LinkedHashMap<>();
 
     static {
@@ -49,7 +51,7 @@ public final class FormUtil {
     private FormUtil() {
     }
 
-    /** Le o corpo inteiro da requisicao como texto UTF-8. */
+    // #18 Leitura: le os dados brutos enviados pelo formulario em UTF-8
     public static String lerCorpo(HttpExchange ex) throws IOException {
         return new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
     }
@@ -61,7 +63,7 @@ public final class FormUtil {
      * @param dados corpo do POST ou query string; null/vazio -> mapa vazio
      */
     public static Map<String, String> parse(String dados) {
-        // COLECAO: LinkedHashMap mantem a ordem em que os campos chegaram
+        // #19 Colecao: parser manual (& e =) em LinkedHashMap para manter a ordem dos campos
         Map<String, String> campos = new LinkedHashMap<>();
         if (dados == null || dados.isEmpty()) {
             return campos;
@@ -129,7 +131,7 @@ public final class FormUtil {
         try {
             return Double.parseDouble(valor.replace(',', '.'));
         } catch (NumberFormatException e) {
-            // TRATAMENTO DE EXCECAO: converte o erro tecnico em mensagem amigavel
+            // #20 Tratamento de excecao: centraliza conversoes e lanca ValidacaoException com mensagem clara
             throw new ValidacaoException("O campo '" + nomeAmigavel(campo) + "' deve ser um número.", e);
         }
     }

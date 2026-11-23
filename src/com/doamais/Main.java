@@ -34,9 +34,12 @@ public class Main {
     public static final int PORTA = 8080;
 
     public static void main(String[] args) throws IOException {
+        // #1 Inicializa o banco SQLite e os dados iniciais antes de aceitar acessos
         Database.inicializar();
 
         HttpServer servidor = HttpServer.create(new InetSocketAddress(PORTA), 0);
+        // #2 Registra as rotas de cada integrante (mantem o projeto modular).
+        // Polimorfismo de interface: createContext aceita classes diferentes pelo contrato HttpHandler.
         servidor.createContext("/", new HomeHandler());
         servidor.createContext("/doadores", new DoadorHandler());
         servidor.createContext("/aptidao", new AptidaoHandler());
@@ -45,7 +48,7 @@ public class Main {
         // Arquivos estaticos (style.css, app.js) da pasta web/; ".." e bloqueado no handler
         servidor.createContext("/static/", new ArquivoEstaticoHandler("web"));
 
-        // Varias threads: o servidor atende requisicoes em paralelo
+        // #3 Pool de 8 threads: atende varios usuarios ao mesmo tempo na porta 8080
         servidor.setExecutor(Executors.newFixedThreadPool(8));
         servidor.start();
         System.out.println("DoaMais rodando em http://localhost:" + PORTA);

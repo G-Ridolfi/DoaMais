@@ -27,6 +27,7 @@ import java.util.List;
  *
  * Responsavel: Maria Vitoria.
  */
+// #11 Heranca + Polimorfismo: herda da BaseHandler e sobrescreve apenas o get()
 public class HomeHandler extends BaseHandler {
 
     /**
@@ -36,6 +37,7 @@ public class HomeHandler extends BaseHandler {
     @Override
     protected void get(HttpExchange ex) throws DoaMaisException, IOException {
         String caminho = getCaminho(ex);
+        // #12 Garante 404 para enderecos desconhecidos em vez de abrir a Home errada
         if (!"/".equals(caminho)) {
             enviarHtml(ex, 404, HtmlUtil.pagina("Página não encontrada",
                     HtmlUtil.alerta("erro", "Endereço não encontrado: " + caminho)
@@ -49,10 +51,11 @@ public class HomeHandler extends BaseHandler {
 
     /** Termometro do HEMOES: 8 badges + frase de alerta com os tipos criticos. */
     private String montarTermometro() throws DoaMaisException {
-        // COLECAO: EnumMap mantem os tipos na ordem do enum (A+, A-, ..., O-)
+        // #13 Colecao + Leitura do banco: EnumMap por usar chave enum (leve e na ordem dos tipos)
         EnumMap<TipoSanguineo, NivelEstoque> estoque = new EstoqueDAO().carregarTermometro();
 
         StringBuilder badges = new StringBuilder();
+        // #14 Colecao: ArrayList dinamico para reunir os tipos em nivel critico no alerta urgente
         List<String> criticos = new ArrayList<>();
         estoque.forEach((tipo, nivel) -> {
             badges.append(HtmlUtil.badgeEstoque(tipo, nivel)).append('\n');
@@ -83,7 +86,7 @@ public class HomeHandler extends BaseHandler {
 
     /** Feed com os cards das campanhas ativas (mais urgentes primeiro). */
     private String montarFeed() throws DoaMaisException {
-        // COLECAO: List de receptores devolvida pelo DAO
+        // #15 Colecao + Leitura do banco: lista campanhas ativas do SQLite para gerar os cards
         List<Receptor> campanhas = new ReceptorDAO().listarAtivas();
 
         StringBuilder html = new StringBuilder();
